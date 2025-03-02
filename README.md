@@ -12,7 +12,7 @@ Cosect is ideal for scenarios where two parties:
   - Threat intelligence observables (domains, IPs, hashes, etc.)
 
 ## Roadmap
-- [V] Define ambitions and scope
+- [x] Define ambitions and scope
 - [ ] Define technical approach for PSI.
 - [ ] Develop proof-of-concept client-server model.
 - [ ] Implement encryption and authentication.
