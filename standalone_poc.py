@@ -7,6 +7,7 @@ import argparse
 import csv
 import json
 import subprocess
+import time
 from pathlib import Path
 
 
@@ -19,6 +20,10 @@ DEFAULT_IMAGE = "secretflow/secretflow-anolis8:latest"
 
 def run(command: list[str]) -> None:
     subprocess.run(command, check=True)
+
+
+def print_step(message: str) -> None:
+    print(f"[standalone] {message}", flush=True)
 
 
 def count_rows(path: Path) -> int:
@@ -49,10 +54,20 @@ def main() -> int:
     party_b = Path(args.party_b).resolve()
     out_dir = Path(args.out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
+    party_a_rows = count_rows(party_a)
+    party_b_rows = count_rows(party_b)
+    start_time = time.monotonic()
+
+    print_step(f"job id: {args.job_id}")
+    print_step(f"party_a input: {party_a} ({party_a_rows} rows)")
+    print_step(f"party_b input: {party_b} ({party_b_rows} rows)")
+    print_step(f"output directory: {out_dir}")
 
     if args.pull:
+        print_step(f"pulling Docker image {args.image}")
         run(["docker", "pull", args.image])
 
+    print_step("starting SecretFlow PSI run in Docker")
     run(
         [
             "docker",
@@ -76,16 +91,21 @@ def main() -> int:
             args.job_id,
         ]
     )
+    elapsed_seconds = time.monotonic() - start_time
+    print_step(f"PSI run completed in {elapsed_seconds:.1f}s")
 
     audit_path = out_dir / "audit.json"
     result_path = out_dir / "party_a_intersection.csv"
     audit = json.loads(audit_path.read_text(encoding="utf-8"))
     matches = read_domains(result_path)
 
+    print_step(f"audit file written to {audit_path}")
+    print_step(f"result file written to {result_path}")
+
     print()
     print("PSI standalone POC")
-    print(f"party_a input rows: {count_rows(party_a)}")
-    print(f"party_b input rows: {count_rows(party_b)}")
+    print(f"party_a input rows: {party_a_rows}")
+    print(f"party_b input rows: {party_b_rows}")
     print(f"intersection rows: {audit['intersection']['rows']}")
     print(f"audit file: {audit_path}")
     print(f"result file: {result_path}")
