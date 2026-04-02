@@ -8,6 +8,7 @@ import csv
 import hashlib
 import json
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -24,6 +25,15 @@ def count_rows(path: Path) -> int:
     with path.open(newline="", encoding="utf-8") as infile:
         reader = csv.DictReader(infile)
         return sum(1 for _ in reader)
+
+
+def read_domains(path: Path) -> list[str]:
+    with path.open(newline="", encoding="utf-8") as infile:
+        return [row["domain"] for row in csv.DictReader(infile)]
+
+
+def expected_intersection(party_a_path: Path, party_b_path: Path) -> list[str]:
+    return sorted(set(read_domains(party_a_path)) & set(read_domains(party_b_path)))
 
 
 def ensure_identical_outputs(path_a: Path, path_b: Path) -> None:
@@ -57,6 +67,7 @@ def main() -> int:
     out_dir = Path(args.out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
     job_id = args.job_id or datetime.now(timezone.utc).strftime("psi-%Y%m%dT%H%M%SZ")
+    started_at = datetime.now(timezone.utc)
 
     validate_inputs(party_a_path, party_b_path)
 
@@ -93,10 +104,27 @@ def main() -> int:
         broadcast_result=True,
     )
 
+    party_a_output_path = Path(output_path[party_a])
+    party_b_output_path = Path(output_path[party_b])
+    expected_rows = expected_intersection(party_a_path, party_b_path)
+    actual_rows = read_domains(party_a_output_path)
+    if actual_rows != expected_rows:
+        raise SystemExit("SecretFlow output does not match the independently recomputed set intersection")
+    completed_at = datetime.now(timezone.utc)
+
     audit = {
         "job_id": job_id,
-        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "timestamp_utc": completed_at.isoformat(),
         "protocol": args.protocol,
+        "execution": {
+            "started_at_utc": started_at.isoformat(),
+            "completed_at_utc": completed_at.isoformat(),
+            "duration_seconds": round((completed_at - started_at).total_seconds(), 3),
+            "python_version": sys.version.split()[0],
+            "secretflow_version": getattr(sf, "__version__", "unknown"),
+            "runner_sha256": sha256_file(Path(__file__)),
+            "validator_sha256": sha256_file(Path(__file__).with_name("validate_inputs.py")),
+        },
         "reports": reports,
         "party_a": {
             "input_path": str(party_a_path),
@@ -111,14 +139,19 @@ def main() -> int:
             "output_path": output_path[party_b],
         },
         "intersection": {
-            "rows": count_rows(Path(output_path[party_a])),
-            "sha256": sha256_file(Path(output_path[party_a])),
+            "rows": count_rows(party_a_output_path),
+            "sha256": sha256_file(party_a_output_path),
         },
+        "independent_verification": {
+            "method": "sorted set intersection over normalized CSV inputs",
+            "rows": len(expected_rows),
+            "matches_secretflow_output": True,
+        }
     }
 
     ensure_identical_outputs(
-        Path(output_path[party_a]),
-        Path(output_path[party_b]),
+        party_a_output_path,
+        party_b_output_path,
     )
 
     audit_path = out_dir / "audit.json"

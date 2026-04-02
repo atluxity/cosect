@@ -7,6 +7,7 @@ import argparse
 import csv
 import hashlib
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -21,6 +22,18 @@ def sha256_file(path: Path) -> str:
 def count_rows(path: Path) -> int:
     with path.open(newline="", encoding="utf-8") as infile:
         return sum(1 for _ in csv.DictReader(infile))
+
+
+def read_domains(path: Path) -> list[str]:
+    with path.open(newline="", encoding="utf-8") as infile:
+        return [row["domain"] for row in csv.DictReader(infile)]
+
+
+def csv_sha256_for_domains(domains: list[str]) -> str:
+    body = "domain\n"
+    if domains:
+        body += "\n".join(domains) + "\n"
+    return hashlib.sha256(body.encode("utf-8")).hexdigest()
 
 
 def expect(condition: bool, message: str) -> None:
@@ -91,7 +104,47 @@ def main() -> int:
         "intersection SHA-256 mismatch",
     )
 
+    expected_domains = sorted(set(read_domains(party_a_input)) & set(read_domains(party_b_input)))
+    actual_party_a_domains = read_domains(party_a_output)
+    actual_party_b_domains = read_domains(party_b_output)
+
+    expect(
+        actual_party_a_domains == expected_domains,
+        "party_a output does not match independently recomputed plaintext intersection",
+    )
+    expect(
+        actual_party_b_domains == expected_domains,
+        "party_b output does not match independently recomputed plaintext intersection",
+    )
+    if "independent_verification" in audit:
+        expect(
+            audit["independent_verification"]["rows"] == len(expected_domains),
+            "independent verification row count mismatch",
+        )
+        expect(
+            audit["independent_verification"]["matches_secretflow_output"] is True,
+            "audit does not record a successful independent verification",
+        )
+
+    verification = {
+        "job_id": args.job_id,
+        "verified_at_utc": datetime.now(timezone.utc).isoformat(),
+        "manifest_sha256": sha256_file(manifest_path),
+        "audit_sha256": sha256_file(audit_path),
+        "party_a_input_sha256": sha256_file(party_a_input),
+        "party_b_input_sha256": sha256_file(party_b_input),
+        "party_a_output_sha256": sha256_file(party_a_output),
+        "party_b_output_sha256": sha256_file(party_b_output),
+        "recomputed_plaintext_intersection_rows": len(expected_domains),
+        "recomputed_plaintext_intersection_sha256": csv_sha256_for_domains(expected_domains),
+        "output_matches_plaintext_intersection": True,
+        "verification_script_sha256": sha256_file(Path(__file__)),
+    }
+    verification_path = run_dir / "output" / "verification.json"
+    verification_path.write_text(json.dumps(verification, indent=2), encoding="utf-8")
+
     print(f"{run_dir}: verification passed")
+    print(f"verification receipt written to {verification_path}")
     return 0
 
 
