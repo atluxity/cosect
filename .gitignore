@@ -22,15 +22,20 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Local Python environments
+.venv-secretflow/
+
 # C extensions
 *.so
 
 # MacOS
 .DS_Store
 
-# SecretFlow POC runtime output
-.env
-archives/
+# SecretFlow runtime artifacts
+out/
 poc_output/
 runs/
+archives/
+.env
+cleanup.log
 spu.log

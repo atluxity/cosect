@@ -1,0 +1,23 @@
+[Unit]
+Description=SecretFlow PSI Coordinator
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/psi
+EnvironmentFile=/opt/psi/.env
+ExecStart=/usr/bin/python3 /opt/psi/coordinator.py \
+  --host ${PSI_COORDINATOR_HOST} \
+  --port ${PSI_COORDINATOR_PORT} \
+  --validate-timeout-seconds ${PSI_COORDINATOR_VALIDATE_TIMEOUT_SECONDS} \
+  --run-timeout-seconds ${PSI_COORDINATOR_RUN_TIMEOUT_SECONDS} \
+  --verify-timeout-seconds ${PSI_COORDINATOR_VERIFY_TIMEOUT_SECONDS} \
+  --archive-timeout-seconds ${PSI_COORDINATOR_ARCHIVE_TIMEOUT_SECONDS} \
+  --rate-limit-window-seconds ${PSI_COORDINATOR_RATE_LIMIT_WINDOW_SECONDS} \
+  --rate-limit-max-requests ${PSI_COORDINATOR_RATE_LIMIT_MAX_REQUESTS}
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -4,27 +4,25 @@ This repository is now centered on a standalone SecretFlow-based proof of concep
 
 Start with [START_HERE.md](START_HERE.md).
 
-If you just want the fastest laptop demo with console output, provide two normalized CSV files:
+If you just want the fastest laptop demo with console output:
 
 ```bash
-python3 standalone_poc.py \
-  --party-a path/to/party_a.csv \
-  --party-b path/to/party_b.csv \
-  --pull
+python3 standalone_poc.py --pull
 ```
 
 ## Repository Layout
 
 - `START_HERE.md`: quickest path to a working test
 - `README.md`: high-level overview
-- `SECURITY.md`: PSI caveats and protocol limitations
+- `data/`: built-in test fixtures and raw CSV templates
+- `docs/`: protocol, coordinator, security, deployment, and retention docs
+- `systemd/`: example service and timer units
+- `.env.example`: coordinator environment template
 - `standalone_poc.py`: simplest local demo
 - `coordinator.py`: local/private HTTP job wrapper
 - `prepare_and_run.py`: normalize, validate, stage, and optionally run PSI
 - `run_2party_psi.py`: local SecretFlow PSI runner used by the wrappers
-- `stage_run.py`, `verify_run.py`, `archive_run.py`, `cleanup_runs.py`, `write_manifest.py`: job lifecycle helpers
-- `CADDYFILE.example` and `nginx.conf.example`: reverse-proxy examples
-- `runs/`, `archives/`, and `poc_output/`: generated at runtime and not stored in git
+- `stage_run.py`, `verify_run.py`, `archive_run.py`, `cleanup_runs.py`: run lifecycle helpers
 
 ## Goal
 
@@ -51,10 +49,10 @@ Normalize before PSI with:
 python3 normalize_domains.py --input raw.csv --output normalized.csv
 ```
 
-Validate the normalized CSVs with:
+Validate normalized inputs with:
 
 ```bash
-python3 validate_inputs.py path/to/party_a.csv path/to/party_b.csv
+python3 validate_inputs.py data/party_a_domains.csv data/party_b_domains.csv
 ```
 
 ## Two Main Entry Points
@@ -62,45 +60,41 @@ python3 validate_inputs.py path/to/party_a.csv path/to/party_b.csv
 For a laptop demo:
 
 ```bash
-python3 standalone_poc.py \
-  --party-a path/to/party_a.csv \
-  --party-b path/to/party_b.csv \
-  --pull
+python3 standalone_poc.py --pull
 ```
 
 For the local HTTP job model:
 
 ```bash
-cat > .env <<'EOF'
-ADMIN_API_KEY=replace-admin-key
-PARTY_A_API_KEY=replace-party-a-key
-PARTY_B_API_KEY=replace-party-b-key
-EOF
-
+cp .env.example .env
 python3 coordinator.py --env-file .env
-
 python3 http_integration_test.py \
   --base-url http://127.0.0.1:8080 \
   --job-id psi-http-demo-1 \
-  --party-a path/to/party_a.csv \
-  --party-b path/to/party_b.csv \
+  --party-a data/list_a_200_popular_domains.csv \
+  --party-b data/list_b_60_mixed.csv \
   --admin-api-key replace-admin-key \
   --party-a-api-key replace-party-a-key \
   --party-b-api-key replace-party-b-key
 ```
 
-## Generated Layout
+## Built-In Test Data
 
-- `runs/<job_id>/`: staged inputs, status, logs, and output artifacts for active jobs
-- `archives/<job_id>/`: archived job bundles produced by `archive_run.py`
-- `poc_output/`: default output directory for the standalone demo
+- `data/list_a_200_popular_domains.csv`: 200 popular domains
+- `data/list_b_10_random_from_a.csv`: 10 guaranteed overlaps against A
+- `data/list_b_50_not_in_a.csv`: 50 disjoint domains
+- `data/list_b_60_mixed.csv`: 60 domains with exactly 10 overlaps against A
+
+## Runtime Output
+
+- `runs/<job_id>/`: active job state, inputs, logs, and results
+- `archives/<job_id>/`: archived runs created by `archive_run.py`
+- `poc_output/`: default output location for the standalone demo
 
 ## License
 
 This repository is distributed under Apache License 2.0.
 
-## Additional Notes
+## Reference Docs
 
-- `coordinator.py` is the source of truth for the HTTP routes and artifact names.
-- `SECURITY.md` captures protocol caveats and attack-surface assumptions.
-- Reverse-proxy examples live in `CADDYFILE.example` and `nginx.conf.example`.
+See [docs/COORDINATOR.md](docs/COORDINATOR.md), [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md), [docs/SECURITY_CHECKLIST.md](docs/SECURITY_CHECKLIST.md), and [docs/RETENTION.md](docs/RETENTION.md) for the deeper operational material.
