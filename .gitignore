@@ -1,0 +1,36 @@
+# Bazel
+bazel-*
+
+# CLion
+.clwb
+
+# VScode
+.vscode
+
+# npm
+node_modules/
+
+# JS code coverage
+coverage/
+dist/
+
+# TS output
+tsc-out/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# MacOS
+.DS_Store
+
+# SecretFlow POC runtime output
+.env
+archives/
+poc_output/
+runs/
+spu.log

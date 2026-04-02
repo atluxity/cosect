@@ -1,0 +1,31 @@
+{
+  "job_id": "psi-20260401T090000Z",
+  "purpose": "Share exact overlapping domains between two industry peers",
+  "execution_date_utc": "2026-04-01T09:00:00Z",
+  "protocol": "KKRT_PSI_2PC",
+  "broadcast_result": true,
+  "parties": [
+    {
+      "name": "party_a",
+      "organization": "Company A",
+      "operator": "operator_a",
+      "source_export_date": "2026-04-01",
+      "approved": true
+    },
+    {
+      "name": "party_b",
+      "organization": "Company B",
+      "operator": "operator_b",
+      "source_export_date": "2026-04-01",
+      "approved": true
+    }
+  ],
+  "canonicalization": {
+    "lowercase": true,
+    "trim_whitespace": true,
+    "remove_trailing_dot": true,
+    "convert_idn_to_punycode": true,
+    "preserve_subdomains": true
+  },
+  "notes": "Both parties agree that only the exact overlap is revealed."
+}
