@@ -16,9 +16,9 @@ This repository is intended to show three things:
 
 Important limits:
 
-- proof that the machine running the PSI code was honest and not tampered with
-- protection against repeated probing or abusive job frequency
-- a production-ready transport and authentication posture by default
+- This does not prove that the machines running the PSI code were honest or free from tampering.
+- This does not prevent one side from running too many jobs or using repeated runs to probe for changes over time.
+- This is not a production-ready security package by itself. Real deployment still needs transport security, peer authentication, authorization, rate limits, and operational controls.
 
 Start with [START_HERE.md](START_HERE.md).
 
