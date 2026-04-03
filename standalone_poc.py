@@ -44,6 +44,11 @@ def main() -> int:
     parser.add_argument("--out-dir", default=str(DEFAULT_OUT_DIR), help="Directory for local output")
     parser.add_argument("--image", default=DEFAULT_IMAGE, help="SecretFlow Docker image")
     parser.add_argument(
+        "--show-results",
+        action="store_true",
+        help="Print the matching domains after the run completes",
+    )
+    parser.add_argument(
         "--pull",
         action="store_true",
         help="Pull the Docker image before running",
@@ -110,13 +115,15 @@ def main() -> int:
     print(f"intersection rows: {audit['intersection']['rows']}")
     print(f"audit file: {audit_path}")
     print(f"result file: {result_path}")
-    print()
-    print("Matching domains:")
-    if matches:
-        for domain in matches:
-            print(domain)
-    else:
-        print("(none)")
+    print("status: success")
+    if args.show_results:
+        print()
+        print("Matching domains:")
+        if matches:
+            for domain in matches:
+                print(domain)
+        else:
+            print("(none)")
 
     return 0
 

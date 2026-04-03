@@ -33,6 +33,10 @@ def print_step(message: str) -> None:
     print(f"[distributed-demo] {message}", flush=True)
 
 
+def short_fingerprint(value: str, prefix: int = 16) -> str:
+    return value[:prefix]
+
+
 def unused_tcp_port() -> int:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.bind(("127.0.0.1", 0))
@@ -101,6 +105,7 @@ def main() -> int:
             "/party_data/output/party_a_receipt.json",
             "--party-b-receipt-path",
             "/party_data/output/party_b_receipt.json",
+            "--quiet",
         ]
     )
 
@@ -111,7 +116,7 @@ def main() -> int:
     print_step(f"session file: {session_path}")
     print_step(f"party_a input rows: {count_rows(party_a_input)}")
     print_step(f"party_b input rows: {count_rows(party_b_input)}")
-    print_step("starting Party A container")
+    print_step("starting Party A worker")
     party_a_proc = subprocess.Popen(
         [
             "docker",
@@ -138,7 +143,7 @@ def main() -> int:
         ]
     )
     time.sleep(1.0)
-    print_step("starting Party B container")
+    print_step("starting Party B worker")
     party_b_proc = subprocess.Popen(
         [
             "docker",
@@ -190,13 +195,14 @@ def main() -> int:
     print(f"party_a receipt: {party_a_dir / 'output' / 'party_a_receipt.json'}")
     print(f"party_b receipt: {party_b_dir / 'output' / 'party_b_receipt.json'}")
     print(f"output rows: {summary['output_rows']}")
-    print(f"output fingerprint: {summary['output_sha256']}")
+    print(f"output fingerprint: {short_fingerprint(summary['output_sha256'])}")
     print()
     print("What this run shows:")
     print("- party_a kept its own input file on its own side")
     print("- party_b kept its own input file on its own side")
     print("- the two sides ran PSI against each other directly")
     print("- both sides ended with the same result and matching receipts")
+    print("status: success")
     return 0
 
 

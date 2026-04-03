@@ -25,6 +25,11 @@ def main() -> int:
     parser.add_argument("--party-b-output-path", required=True)
     parser.add_argument("--party-a-receipt-path", required=True)
     parser.add_argument("--party-b-receipt-path", required=True)
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Do not print a session-file confirmation line",
+    )
     args = parser.parse_args()
 
     session = {
@@ -61,7 +66,8 @@ def main() -> int:
     session_path = Path(args.session_file).resolve()
     session_path.parent.mkdir(parents=True, exist_ok=True)
     session_path.write_text(json.dumps(session, indent=2), encoding="utf-8")
-    print(f"wrote session file to {session_path}")
+    if not args.quiet:
+        print(f"wrote session file to {session_path}")
     return 0
 
 

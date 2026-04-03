@@ -28,6 +28,10 @@ def count_rows(path: Path) -> int:
         return sum(1 for _ in csv.DictReader(infile))
 
 
+def short_fingerprint(value: str, prefix: int = 16) -> str:
+    return value[:prefix]
+
+
 def normalize_session(session: dict) -> dict:
     required_top_level = {"job_id", "protocol", "parties", "spu"}
     missing = required_top_level - set(session)
@@ -165,6 +169,7 @@ def main() -> int:
     }
 
     print_step(self_party, "connecting to the other party and running PSI")
+    print_step(self_party, "backend logs may appear while PSI is running")
     reports = spu.psi_csv(
         key="domain",
         input_path=input_path,
@@ -220,8 +225,9 @@ def main() -> int:
         print_step(self_party, f"local output written to {local_output_path}")
         print_step(
             self_party,
-            f"local result: {local_output_rows} rows, fingerprint {local_output_sha256}"
+            f"local result: {local_output_rows} rows, fingerprint {short_fingerprint(local_output_sha256)}"
         )
+        print_step(self_party, "status: success")
 
     sf.shutdown()
     return 0
