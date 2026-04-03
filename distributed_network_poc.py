@@ -7,6 +7,7 @@ import argparse
 import csv
 import json
 import shutil
+import socket
 import subprocess
 import time
 from pathlib import Path
@@ -29,12 +30,19 @@ def count_rows(path: Path) -> int:
 
 
 def print_step(message: str) -> None:
-    print(f"[strict-demo] {message}", flush=True)
+    print(f"[distributed-demo] {message}", flush=True)
+
+
+def unused_tcp_port() -> int:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind(("127.0.0.1", 0))
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return int(sock.getsockname()[1])
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--job-id", default="psi-strict-network-demo")
+    parser.add_argument("--job-id", default="psi-distributed-network-demo")
     parser.add_argument("--party-a", default=str(DEFAULT_PARTY_A))
     parser.add_argument("--party-b", default=str(DEFAULT_PARTY_B))
     parser.add_argument("--image", default=DEFAULT_IMAGE)
@@ -55,6 +63,11 @@ def main() -> int:
     shutil.copy2(Path(args.party_a).resolve(), party_a_input)
     shutil.copy2(Path(args.party_b).resolve(), party_b_input)
 
+    party_a_port = unused_tcp_port()
+    party_b_port = unused_tcp_port()
+    party_a_spu_port = unused_tcp_port()
+    party_b_spu_port = unused_tcp_port()
+
     session_path = shared_dir / "session.json"
     run(
         [
@@ -65,13 +78,17 @@ def main() -> int:
             "--session-file",
             str(session_path),
             "--party-a-address",
-            "127.0.0.1:43001",
+            f"127.0.0.1:{party_a_port}",
             "--party-b-address",
-            "127.0.0.1:43002",
+            f"127.0.0.1:{party_b_port}",
+            "--party-a-listen-addr",
+            f"127.0.0.1:{party_a_port}",
+            "--party-b-listen-addr",
+            f"127.0.0.1:{party_b_port}",
             "--party-a-spu-address",
-            "127.0.0.1:43101",
+            f"127.0.0.1:{party_a_spu_port}",
             "--party-b-spu-address",
-            "127.0.0.1:43102",
+            f"127.0.0.1:{party_b_spu_port}",
             "--party-a-input-path",
             "/party_data/input/party_a_domains.csv",
             "--party-b-input-path",
@@ -91,9 +108,10 @@ def main() -> int:
         print_step(f"pulling Docker image {args.image}")
         run(["docker", "pull", args.image])
 
+    print_step(f"session file: {session_path}")
     print_step(f"party_a input rows: {count_rows(party_a_input)}")
     print_step(f"party_b input rows: {count_rows(party_b_input)}")
-    print_step("starting party_a container")
+    print_step("starting Party A container")
     party_a_proc = subprocess.Popen(
         [
             "docker",
@@ -120,7 +138,7 @@ def main() -> int:
         ]
     )
     time.sleep(1.0)
-    print_step("starting party_b container")
+    print_step("starting Party B container")
     party_b_proc = subprocess.Popen(
         [
             "docker",
@@ -152,7 +170,7 @@ def main() -> int:
     if party_a_rc != 0 or party_b_rc != 0:
         raise SystemExit(f"peer containers failed: party_a={party_a_rc}, party_b={party_b_rc}")
 
-    print_step("verifying party receipts agree")
+    print_step("checking that both sides ended with the same result")
     summary_raw = subprocess.check_output(
         [
             "python3",
@@ -172,13 +190,13 @@ def main() -> int:
     print(f"party_a receipt: {party_a_dir / 'output' / 'party_a_receipt.json'}")
     print(f"party_b receipt: {party_b_dir / 'output' / 'party_b_receipt.json'}")
     print(f"output rows: {summary['output_rows']}")
-    print(f"output sha256: {summary['output_sha256']}")
+    print(f"output fingerprint: {summary['output_sha256']}")
     print()
-    print("What this demonstrates:")
-    print("- party_a container mounted only party_a plaintext input")
-    print("- party_b container mounted only party_b plaintext input")
-    print("- no centralized service stored both plaintext CSVs")
-    print("- both parties produced matching receipts for the same session and output")
+    print("What this run shows:")
+    print("- party_a kept its own input file on its own side")
+    print("- party_b kept its own input file on its own side")
+    print("- the two sides ran PSI against each other directly")
+    print("- both sides ended with the same result and matching receipts")
     return 0
 
 

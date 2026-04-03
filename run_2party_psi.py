@@ -60,6 +60,16 @@ def main() -> int:
         default="KKRT_PSI_2PC",
         help="SecretFlow protocol, for example KKRT_PSI_2PC or ECDH_PSI_2PC",
     )
+    parser.add_argument(
+        "--print-audit-json",
+        action="store_true",
+        help="Print the full audit JSON to stdout",
+    )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress the normal completion summary",
+    )
     args = parser.parse_args()
 
     party_a_path = Path(args.party_a).resolve()
@@ -157,8 +167,16 @@ def main() -> int:
     audit_path = out_dir / "audit.json"
     audit_path.write_text(json.dumps(audit, indent=2), encoding="utf-8")
 
-    print(json.dumps(audit, indent=2))
-    print(f"audit written to {audit_path}")
+    if args.print_audit_json:
+        print(json.dumps(audit, indent=2))
+    elif not args.quiet:
+        print("PSI run completed")
+        print(f"job id: {job_id}")
+        print(f"protocol: {args.protocol}")
+        print(f"party_a rows: {audit['party_a']['input_rows']}")
+        print(f"party_b rows: {audit['party_b']['input_rows']}")
+        print(f"intersection rows: {audit['intersection']['rows']}")
+        print(f"audit written to {audit_path}")
 
     sf.shutdown()
     return 0

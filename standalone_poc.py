@@ -67,7 +67,7 @@ def main() -> int:
         print_step(f"pulling Docker image {args.image}")
         run(["docker", "pull", args.image])
 
-    print_step("starting SecretFlow PSI run in Docker")
+    print_step("checking the two local input files and starting SecretFlow in Docker")
     run(
         [
             "docker",
@@ -89,6 +89,7 @@ def main() -> int:
             str(out_dir.relative_to(ROOT)),
             "--job-id",
             args.job_id,
+            "--quiet",
         ]
     )
     elapsed_seconds = time.monotonic() - start_time
@@ -103,7 +104,7 @@ def main() -> int:
     print_step(f"result file written to {result_path}")
 
     print()
-    print("PSI standalone POC")
+    print("Standalone PSI demo")
     print(f"party_a input rows: {party_a_rows}")
     print(f"party_b input rows: {party_b_rows}")
     print(f"intersection rows: {audit['intersection']['rows']}")

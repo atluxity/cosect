@@ -107,6 +107,11 @@ def main() -> int:
         default=False,
         help="Enable Ray-backed production mode instead of thread-pool production mode",
     )
+    parser.add_argument(
+        "--print-receipt-json",
+        action="store_true",
+        help="Print the full local receipt JSON to stdout",
+    )
     args = parser.parse_args()
 
     session_path = Path(args.session_file).resolve()
@@ -121,8 +126,8 @@ def main() -> int:
 
     print_step(self_party, f"job id: {session['job_id']}")
     print_step(self_party, f"session file: {session_path}")
-    print_step(self_party, f"local input: {local_input_path}")
-    print_step(self_party, f"local output: {local_output_path}")
+    print_step(self_party, f"local input: {local_input_path} ({count_rows(local_input_path)} rows)")
+    print_step(self_party, f"local output will be written to: {local_output_path}")
     print_step(self_party, "validating local input")
     validate_local_input(local_input_path)
 
@@ -135,7 +140,7 @@ def main() -> int:
 
     start_monotonic = time.monotonic()
     started_at = datetime.now(timezone.utc)
-    print_step(self_party, "initializing SecretFlow production mode")
+    print_step(self_party, "starting the local SecretFlow worker")
     sf.init(
         address=None,
         cluster_config=cluster_config_for(session, self_party),
@@ -159,7 +164,7 @@ def main() -> int:
         party_b: session["parties"]["party_b"]["output_path"],
     }
 
-    print_step(self_party, "running distributed PSI")
+    print_step(self_party, "connecting to the other party and running PSI")
     reports = spu.psi_csv(
         key="domain",
         input_path=input_path,
@@ -209,7 +214,14 @@ def main() -> int:
     }
     receipt_path.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
     print_step(self_party, f"receipt written to {receipt_path}")
-    print(json.dumps(receipt, indent=2))
+    if args.print_receipt_json:
+        print(json.dumps(receipt, indent=2))
+    else:
+        print_step(self_party, f"local output written to {local_output_path}")
+        print_step(
+            self_party,
+            f"local result: {local_output_rows} rows, fingerprint {local_output_sha256}"
+        )
 
     sf.shutdown()
     return 0
