@@ -1,10 +1,18 @@
 # Strict-Trust Mode
 
-## Goal
+## BLUF
 
-Run PSI between two semi-trusted peers without uploading either plaintext CSV to infrastructure controlled by the other party.
+This is the only remote mode in this repository that is consistent with the stated semi-trusted-peer requirement.
 
-## Core Rule
+Party A plaintext remains on Party A infrastructure.
+
+Party B plaintext remains on Party B infrastructure.
+
+Only SecretFlow protocol traffic and shared session metadata cross the network.
+
+This mode gives you operational evidence that both parties ran the same session and observed the same output. It does not give you cryptographic attestation against a malicious runtime.
+
+## Trust Boundary
 
 Party A plaintext stays on Party A's host.
 
@@ -19,7 +27,7 @@ Only SecretFlow protocol traffic and metadata may cross the network.
 - `verify_peer_psi_receipts.py`: verifies the two party-local receipts agree on the same result
 - `strict_network_poc.py`: local two-container demo of the strict-trust model
 
-## Shared Session File
+## Session File
 
 The shared session file contains:
 
@@ -31,9 +39,9 @@ The shared session file contains:
 - per-party local output path
 - per-party local receipt path
 
-This file does not contain plaintext domains.
+The session file is metadata only. It does not contain plaintext domains.
 
-## Execution Model
+## Execution Sequence
 
 1. Party A normalizes and validates only Party A's local CSV.
 2. Party B normalizes and validates only Party B's local CSV.
@@ -44,7 +52,7 @@ This file does not contain plaintext domains.
 7. Each party writes its own local output CSV and local receipt.
 8. Compare the two receipts with `verify_peer_psi_receipts.py`.
 
-## What The Receipt Proves
+## Evidence Produced
 
 Each party-local receipt records:
 
@@ -56,21 +64,25 @@ Each party-local receipt records:
 - runner and validator script hashes
 - SecretFlow-reported counts
 
-`verify_peer_psi_receipts.py` proves:
+`verify_peer_psi_receipts.py` confirms:
 
 - both parties used the same session file
 - both parties reported the same output hash
 - both parties reported the same output row count
 
-## What It Does Not Prove
+## Analyst Reading
 
-This mode does not produce a cryptographic attestation against a malicious host.
-
-It proves a stronger operational statement than any centralized plaintext-upload flow:
+The evidence supports these statements:
 
 - no centralized service staged both plaintext CSVs
-- each party retained its own plaintext locally
-- the two parties reported the same result for the same session
+- each side retained its own plaintext locally
+- both sides reported the same result for the same session
+
+The evidence does not support these stronger statements:
+
+- the host runtime was non-malicious
+- the operators did not collude
+- the result is remotely attestable to a hostile third party without additional trust anchors
 
 ## Local Demo
 
@@ -86,4 +98,4 @@ The demo starts two Docker containers:
 - Party B container mounts only Party B's plaintext input
 - both mount the shared session file
 
-That is the recommended proof-of-concept shape for semi-trusted peers.
+That is the recommended proof-of-concept shape for semi-trusted peers in this repository.

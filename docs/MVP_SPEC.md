@@ -1,5 +1,16 @@
 # SecretFlow PSI MVP Spec
 
+## BLUF
+
+The acceptance target is not "PSI works in Docker." The acceptance target is:
+
+- exact intersection
+- mutual output
+- party-local plaintext retention in the remote path
+- evidence sufficient for post-run review
+
+Any design that stages both plaintext CSVs on infrastructure controlled by one party is out of scope.
+
 ## Objective
 
 Build a two-party domain-sharing workflow where both parties learn only the exact overlapping domains, and neither side provides its full customer list to the other in plaintext.

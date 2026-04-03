@@ -1,12 +1,16 @@
 # Start Here
 
-Use this page if you want to test the POC quickly without reading the full reference docs first.
+## BLUF
+
+If you care about the actual trust boundary, use the strict-trust remote path, not the standalone path.
+
+The strict-trust path keeps Party A plaintext on Party A's host and Party B plaintext on Party B's host. The standalone path is only for quick local validation on one machine.
 
 This repository includes sample CSV fixtures in `data/` and deeper operational docs in `docs/`.
 
 ## Option 1: Standalone Local Demo
 
-Use this for the fastest one-laptop test with console output.
+Use this for the fastest one-host sanity check.
 
 Requirements:
 
@@ -24,6 +28,12 @@ What it does:
 - runs the SecretFlow PSI flow locally in Docker
 - prints the intersection summary and matching domains
 - writes `poc_output/audit.json` with input and output hashes plus execution metadata
+
+What it does not demonstrate:
+
+- the remote trust boundary
+- party-local plaintext retention
+- the absence of centralized plaintext staging
 
 Use your own CSVs:
 
@@ -48,11 +58,9 @@ example.com
 shared.example
 ```
 
-## Option 2: Local HTTP Coordinator
-
 ## Option 2: Strict-Trust Remote PSI
 
-Use this when the parties are only semi-trusted and neither side may upload a plaintext CSV to the other side.
+Use this when the parties are semi-trusted and neither side may upload a plaintext CSV to the other side.
 
 Requirements:
 
@@ -72,6 +80,12 @@ What it does:
 - shares only a session file with addresses and file locations
 - runs SecretFlow in production mode across the two parties
 - writes one local receipt per party and verifies that the receipts agree on the same output
+
+What to inspect after the run:
+
+- Party A receipt
+- Party B receipt
+- output hash and row-count agreement from `verify_peer_psi_receipts.py`
 
 ## Built-In Test Data
 

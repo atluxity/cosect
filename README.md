@@ -1,6 +1,22 @@
 # SecretFlow PSI POC
 
-This repository is centered on a SecretFlow-based proof of concept for two organizations that want to learn only the overlap between their domain lists without exchanging full customer lists in plaintext.
+## BLUF
+
+This repository implements a two-party PSI proof of concept for semi-trusted peers.
+
+The intended remote mode keeps each party's plaintext CSV on that party's own host. The parties run SecretFlow PSI against each other directly and exchange only protocol traffic plus shared session metadata. No centralized service is allowed to stage both plaintext inputs.
+
+What this repository does prove:
+
+- the parties can compute an exact set intersection with SecretFlow
+- the remote flow can run with party-local plaintext only
+- both parties can retain receipts that bind the run to a specific session and output
+
+What it does not prove:
+
+- cryptographic attestation against a malicious host
+- protection against repeated probing or abusive job frequency
+- a production-ready transport and authentication posture by default
 
 Start with [START_HERE.md](START_HERE.md).
 
@@ -23,14 +39,16 @@ python3 standalone_poc.py --pull
 - `verify_peer_psi_receipts.py`: compares the two party-local receipts for the same distributed run
 - `run_2party_psi.py`: local single-host SecretFlow PSI runner for laptop demos
 
-## Goal
+## Security Model
 
-The current POC is designed to prove four things:
+This codebase assumes:
 
-- exact set intersection
-- output to both parties
-- auditable execution
-- no plaintext full-list transfer between parties
+- two semi-trusted peers
+- exact-domain PSI
+- mutual output of the intersection
+- no plaintext full-list transfer to the other party
+
+The strict-trust remote mode is the relevant one for that model. The standalone mode is retained as a local validation harness and developer test path.
 
 ## Input Format
 
@@ -54,7 +72,7 @@ Validate normalized inputs with:
 python3 validate_inputs.py data/party_a_domains.csv data/party_b_domains.csv
 ```
 
-## Main Entry Points
+## Entry Points
 
 For a laptop demo:
 
@@ -62,13 +80,15 @@ For a laptop demo:
 python3 standalone_poc.py --pull
 ```
 
+Use this only for local validation and operator orientation. It is not the remote trust-boundary story.
+
 For the strict-trust remote model where neither party may upload plaintext CSVs to the other side:
 
 ```bash
 python3 strict_network_poc.py
 ```
 
-That demo starts two separate SecretFlow containers. Each container mounts only its own party's plaintext CSV plus a shared session file. The two parties then run SecretFlow in production mode against each other over the network and produce matching receipts.
+That demo starts two separate SecretFlow containers. Each container mounts only its own party's plaintext CSV plus a shared session file. The parties then run SecretFlow in production mode against each other and produce matching receipts.
 
 ## Built-In Test Data
 
@@ -82,22 +102,26 @@ That demo starts two separate SecretFlow containers. Each container mounts only 
 - `poc_output/`: default output location for the standalone demo
 - `out/strict_network_poc/<job_id>/`: local demo output for the strict-trust network mode
 
-## Proof Artifacts
+## Evidence
 
-The proof model depends on which execution shape you use.
+The repository emits evidence, not cryptographic proof.
 
 Single-host standalone runs produce:
 
-- `output/audit.json`: records input hashes, output hashes, execution timing, SecretFlow version, and the exact runner and validator script hashes used for the run
+- `output/audit.json`: input hashes, output hash, execution timing, SecretFlow version, and runner/validator hashes
 
 Strict-trust distributed runs produce:
 
-- `party_a_receipt.json`: Party A's local receipt with its own input hash, output hash, session hash, execution metadata, and SecretFlow report counts
-- `party_b_receipt.json`: Party B's local receipt with the same structure
+- `party_a_receipt.json`: Party A local receipt with input hash, output hash, session hash, execution metadata, and SecretFlow report counts
+- `party_b_receipt.json`: Party B local receipt with the same structure
 
 `verify_peer_psi_receipts.py` checks that both receipts refer to the same session and agree on the same output hash and row count.
 
-These files still do not create a cryptographic proof for a hostile third party, but they do give each operator a concrete receipt showing what local input they used and what shared output was produced.
+These artifacts support a narrower claim:
+
+- each operator can show which local input was used
+- both operators can show they ran the same session
+- both operators can show they observed the same output
 
 ## License
 

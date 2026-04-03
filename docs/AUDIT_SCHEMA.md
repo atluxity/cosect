@@ -1,5 +1,15 @@
 # Audit Schema
 
+## BLUF
+
+`audit.json` is evidence for the standalone single-host path only.
+
+It records what inputs were used, what output was produced, and what exact runner code generated the artifact. It does not prove anything about remote peer trust boundaries by itself.
+
+For the strict-trust distributed mode, the relevant evidence is the pair of party-local receipts plus the receipt comparison step.
+
+## Standalone Audit
+
 `audit.json` is the minimum audit artifact for each single-host standalone PSI run.
 
 ## Fields
@@ -66,7 +76,11 @@
 
 ## Why It Matters
 
-This file is the evidence for the claim that the run used local inputs, produced only the overlap, and did not require plaintext full-list exchange.
+This file supports a narrow claim:
+
+- the standalone run used these specific inputs
+- it produced this specific output
+- the output matched a local plaintext recomputation of the intersection
 
 ## Distributed Strict-Trust Mode
 

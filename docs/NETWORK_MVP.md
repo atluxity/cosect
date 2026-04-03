@@ -1,5 +1,13 @@
 # Network MVP
 
+## BLUF
+
+The network shape is peer-to-peer PSI with optional metadata coordination.
+
+It is not a file-upload service.
+
+If any shared service receives both plaintext CSVs, the trust boundary has already failed.
+
 ## Goal
 
 Run SecretFlow PSI between two real hosts without uploading either party's plaintext CSV to any centralized service or the other party.
@@ -64,7 +72,7 @@ For the first strict-trust networked version, assume:
 - IP allowlists or VPN
 - no public internet exposure
 
-The local demo uses plaintext localhost transport inside one machine for convenience only. Real deployments should configure SecretFlow TLS in the shared session.
+The local demo uses plaintext localhost transport inside one machine for convenience only. Real deployments should configure SecretFlow TLS and fixed peer identity.
 
 ## Hard Boundary
 
