@@ -16,7 +16,7 @@ This repository is intended to show three things:
 
 Important limits:
 
-- cryptographic attestation against a malicious host
+- proof that the machine running the PSI code was honest and not tampered with
 - protection against repeated probing or abusive job frequency
 - a production-ready transport and authentication posture by default
 
