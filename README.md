@@ -1,5 +1,7 @@
 # SecretFlow PSI POC
 
+This project is for the case where two organizations want to find the customers or domains they have in common, but neither side wants to hand over its full list to the other.
+
 ## BLUF
 
 This repository implements a two-party PSI proof of concept for semi-trusted peers.
