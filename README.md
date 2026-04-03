@@ -6,7 +6,7 @@ This project is for the case where two organizations want to find the customers 
 
 This repository implements a two-party PSI proof of concept for semi-trusted peers.
 
-The intended remote mode keeps each party's plaintext CSV on that party's own host. The parties run SecretFlow PSI against each other directly and exchange only protocol traffic plus shared session metadata. No centralized service is allowed to stage both plaintext inputs.
+In the remote setup, each side keeps its own CSV on its own machine. The two sides run the PSI process directly against each other. They do not send their full lists to a shared service, and no central system is allowed to hold both plaintext inputs.
 
 What this repository does prove:
 
