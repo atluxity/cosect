@@ -8,13 +8,13 @@ This repository implements a two-party PSI proof of concept for semi-trusted pee
 
 In the remote setup, each side keeps its own CSV on its own machine. The two sides run the PSI process directly against each other. They do not send their full lists to a shared service, and no central system is allowed to hold both plaintext inputs.
 
-What this repository does prove:
+This repository is intended to show three things:
 
 - the parties can compute an exact set intersection with SecretFlow
 - the remote flow can run with party-local plaintext only
 - both parties can retain receipts that bind the run to a specific session and output
 
-What it does not prove:
+Important limits:
 
 - cryptographic attestation against a malicious host
 - protection against repeated probing or abusive job frequency
