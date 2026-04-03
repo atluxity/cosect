@@ -106,7 +106,7 @@ That demo starts two separate SecretFlow containers. Each container mounts only 
 
 ## Evidence
 
-The repository emits evidence, not cryptographic proof.
+The repository produces records you can review after a run. It does not produce a self-proving security guarantee.
 
 Single-host standalone runs produce:
 

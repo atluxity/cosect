@@ -2,11 +2,11 @@
 
 ## BLUF
 
-`audit.json` is evidence for the standalone single-host path only.
+`audit.json` is the review record for the standalone single-host path only.
 
-It records what inputs were used, what output was produced, and what exact runner code generated the artifact. It does not prove anything about remote peer trust boundaries by itself.
+It records what inputs were used, what output was produced, and what exact runner code generated the artifact. By itself, it does not say anything about the remote peer trust boundary.
 
-For the distributed mode, the relevant evidence is the pair of party-local receipts plus the receipt comparison step.
+For the distributed mode, the relevant record is the pair of party-local receipts plus the receipt comparison step.
 
 ## Standalone Audit
 

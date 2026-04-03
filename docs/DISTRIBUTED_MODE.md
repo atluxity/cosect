@@ -10,7 +10,7 @@ Party B plaintext remains on Party B infrastructure.
 
 Only SecretFlow protocol traffic and shared session metadata cross the network.
 
-This mode gives you operational evidence that both parties ran the same session and observed the same output. It does not give you cryptographic attestation against a malicious runtime.
+This mode gives you a concrete record that both parties ran the same session and observed the same output. It does not prove that the machines themselves were honest or untampered.
 
 ## Trust Boundary
 
@@ -52,7 +52,7 @@ The session file is metadata only. It does not contain plaintext domains.
 7. Each party writes its own local output CSV and local receipt.
 8. Compare the two receipts with `verify_peer_psi_receipts.py`.
 
-## Evidence Produced
+## Records Produced
 
 Each party-local receipt records:
 
@@ -70,19 +70,19 @@ Each party-local receipt records:
 - both parties reported the same output hash
 - both parties reported the same output row count
 
-## Analyst Reading
+## What These Records Support
 
-The evidence supports these statements:
+These records support these statements:
 
 - no centralized service staged both plaintext CSVs
 - each side retained its own plaintext locally
 - both sides reported the same result for the same session
 
-The evidence does not support these stronger statements:
+These records do not support these stronger statements:
 
 - the host runtime was non-malicious
 - the operators did not collude
-- the result is remotely attestable to a hostile third party without additional trust anchors
+- a hostile third party can verify the result without adding stronger trust anchors
 
 ## Local Demo
 

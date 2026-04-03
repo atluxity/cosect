@@ -4,7 +4,7 @@
 
 If you care about the actual trust boundary, use the distributed remote path, not the standalone path.
 
-The distributed path keeps Party A plaintext on Party A's host and Party B plaintext on Party B's host. The standalone path is only for quick local validation on one machine.
+In the distributed path, Party A keeps its plaintext on Party A's host and Party B keeps its plaintext on Party B's host. The standalone path is only for quick local validation on one machine.
 
 This repository includes sample CSV fixtures in `data/` and deeper operational docs in `docs/`.
 
@@ -85,7 +85,7 @@ What to inspect after the run:
 
 - Party A receipt
 - Party B receipt
-- output hash and row-count agreement from `verify_peer_psi_receipts.py`
+- matching output hash and row count from `verify_peer_psi_receipts.py`
 
 ## Built-In Test Data
 
