@@ -1,7 +1,0 @@
-[Unit]
-Description=SecretFlow PSI Retention Cleanup
-
-[Service]
-Type=oneshot
-WorkingDirectory=/opt/psi
-ExecStart=/usr/bin/python3 /opt/psi/cleanup_runs.py --keep-mode metadata-only --older-than-hours 24

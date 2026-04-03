@@ -66,7 +66,7 @@ Each party-local receipt records:
 
 This mode does not produce a cryptographic attestation against a malicious host.
 
-It proves a stronger operational statement than the coordinator-upload flow:
+It proves a stronger operational statement than any centralized plaintext-upload flow:
 
 - no centralized service staged both plaintext CSVs
 - each party retained its own plaintext locally

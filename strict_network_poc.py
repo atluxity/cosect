@@ -177,7 +177,7 @@ def main() -> int:
     print("What this demonstrates:")
     print("- party_a container mounted only party_a plaintext input")
     print("- party_b container mounted only party_b plaintext input")
-    print("- no coordinator stored both plaintext CSVs")
+    print("- no centralized service stored both plaintext CSVs")
     print("- both parties produced matching receipts for the same session and output")
     return 0
 

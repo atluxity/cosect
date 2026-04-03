@@ -2,7 +2,7 @@
 
 ## Goal
 
-Run SecretFlow PSI between two real hosts without uploading either party's plaintext CSV to a coordinator or the other party.
+Run SecretFlow PSI between two real hosts without uploading either party's plaintext CSV to any centralized service or the other party.
 
 The network layer should orchestrate:
 
@@ -16,7 +16,7 @@ It should not redefine normalization or file formats.
 
 ## Recommended Shape
 
-Use two party-local runners plus an optional metadata-only coordinator.
+Use two party-local runners plus an optional metadata-only control plane.
 
 Each party keeps its own normalized CSV locally and runs the same SecretFlow job code on its own host.
 
@@ -35,14 +35,14 @@ The plaintext CSV stays only on the host that owns it.
 
 - keeps the PSI contract stable
 - preserves the trust boundary the PSI workflow is supposed to protect
-- avoids a coordinator becoming a plaintext data sink
+- avoids any centralized service becoming a plaintext data sink
 - supports party-local receipts instead of centralized file staging
 
 ## Roles
 
 - `party_a runner`: reads Party A local CSV, participates in PSI, writes Party A local result and receipt
 - `party_b runner`: reads Party B local CSV, participates in PSI, writes Party B local result and receipt
-- `metadata coordinator` optional: stores the shared session manifest and the two receipts, but never stores plaintext CSVs
+- `metadata control plane` optional: stores the shared session manifest and the two receipts, but never stores plaintext CSVs
 
 ## Lifecycle
 

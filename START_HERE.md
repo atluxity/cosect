@@ -2,7 +2,7 @@
 
 Use this page if you want to test the POC quickly without reading the full reference docs first.
 
-This repository includes sample CSV fixtures in `data/`, deeper operational docs in `docs/`, and example service units in `systemd/`.
+This repository includes sample CSV fixtures in `data/` and deeper operational docs in `docs/`.
 
 ## Option 1: Standalone Local Demo
 
@@ -50,45 +50,7 @@ shared.example
 
 ## Option 2: Local HTTP Coordinator
 
-Use this only if you want to test the older networked workflow wrapper on one machine first.
-
-Requirements:
-
-- Docker installed
-- Python 3 available
-
-Copy the env template and set temporary keys:
-
-```bash
-cp .env.example .env
-```
-
-The template uses the `PSI_COORDINATOR_*` environment variable names that `coordinator.py` reads at startup.
-
-Start the coordinator:
-
-```bash
-python3 coordinator.py --env-file .env
-```
-
-Then run the authenticated integration test:
-
-```bash
-python3 http_integration_test.py \
-  --base-url http://127.0.0.1:8080 \
-  --job-id psi-http-demo-1 \
-  --party-a data/list_a_200_popular_domains.csv \
-  --party-b data/list_b_60_mixed.csv \
-  --admin-api-key replace-admin-key \
-  --party-a-api-key replace-party-a-key \
-  --party-b-api-key replace-party-b-key
-```
-
-After `POST /verify`, inspect `runs/<job_id>/output/verification.json`. That receipt records the manifest hash, audit hash, input and output hashes, and whether the output exactly matches an independently recomputed plaintext intersection of the staged inputs.
-
-This mode uploads both plaintext CSVs to the coordinator host. It is not suitable when Party A must not reveal its plaintext list to Party B's infrastructure, or vice versa.
-
-## Option 3: Strict-Trust Remote PSI
+## Option 2: Strict-Trust Remote PSI
 
 Use this when the parties are only semi-trusted and neither side may upload a plaintext CSV to the other side.
 
@@ -121,9 +83,7 @@ What it does:
 ## Read Next
 
 - [README.md](README.md): overview
-- [docs/COORDINATOR.md](docs/COORDINATOR.md): coordinator usage
-- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md): reverse-proxy and TLS assumptions
+- [docs/NETWORK_MVP.md](docs/NETWORK_MVP.md): network shape and trust boundary
 - [docs/STRICT_TRUST_MODE.md](docs/STRICT_TRUST_MODE.md): architecture for semi-trusted remote peers
 - [docs/AUDIT_SCHEMA.md](docs/AUDIT_SCHEMA.md): audit and verification receipt fields
-- [docs/SECURITY_CHECKLIST.md](docs/SECURITY_CHECKLIST.md): operational safety checks
-- [docs/RETENTION.md](docs/RETENTION.md): retention modes
+- [docs/MVP_SPEC.md](docs/MVP_SPEC.md): acceptance criteria and deferred work

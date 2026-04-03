@@ -1,9 +1,0 @@
-[Unit]
-Description=Run SecretFlow PSI Retention Cleanup Daily
-
-[Timer]
-OnCalendar=*-*-* 02:15:00
-Persistent=true
-
-[Install]
-WantedBy=timers.target

@@ -1,6 +1,6 @@
 # Audit Schema
 
-`audit.json` is the minimum audit artifact for each local PSI run.
+`audit.json` is the minimum audit artifact for each single-host standalone PSI run.
 
 ## Fields
 
@@ -68,14 +68,12 @@
 
 This file is the evidence for the claim that the run used local inputs, produced only the overlap, and did not require plaintext full-list exchange.
 
-## Verification Receipt
+## Distributed Strict-Trust Mode
 
-`verify_run.py` also writes `output/verification.json`.
+The strict-trust distributed mode uses party-local receipts instead of any centralized verification receipt file.
 
-That receipt independently recomputes the plaintext intersection from the staged inputs and records:
+Instead, each party writes its own local receipt and `verify_peer_psi_receipts.py` confirms that both sides:
 
-- manifest SHA-256
-- audit SHA-256
-- input and output SHA-256 values
-- recomputed intersection row count and SHA-256
-- whether the output matches the independently recomputed intersection
+- used the same session file
+- produced the same output SHA-256
+- produced the same output row count

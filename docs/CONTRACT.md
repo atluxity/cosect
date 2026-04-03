@@ -44,7 +44,7 @@ The runner writes:
 
 - `party_a_intersection.csv`
 - `party_b_intersection.csv`
-- `audit.json`
+- `audit.json` for standalone mode, or per-party receipts for strict-trust distributed mode
 
 Intersection CSV contract:
 

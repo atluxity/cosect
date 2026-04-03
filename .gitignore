@@ -34,8 +34,4 @@ __pycache__/
 # SecretFlow runtime artifacts
 out/
 poc_output/
-runs/
-archives/
-.env
-cleanup.log
 spu.log
