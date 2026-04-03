@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Write a shared session file for strict-trust two-party PSI execution."""
+"""Write a shared session file for distributed two-party PSI execution."""
 
 from __future__ import annotations
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify that two strict-trust PSI party receipts agree on the same session and result."""
+"""Verify that two distributed PSI party receipts agree on the same session and result."""
 
 from __future__ import annotations
 

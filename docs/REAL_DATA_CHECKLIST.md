@@ -44,7 +44,7 @@ Before using live customer data:
 
 - run the workflow once with non-sensitive test data
 - confirm both sides get the same intersection CSV
-- confirm `audit.json` is produced for standalone mode, or party-local receipts are produced for strict-trust distributed mode
+- confirm `audit.json` is produced for standalone mode, or party-local receipts are produced for distributed mode
 
 ## First Real Run
 

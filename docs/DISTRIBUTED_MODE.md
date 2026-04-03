@@ -1,4 +1,4 @@
-# Strict-Trust Mode
+# Distributed Mode
 
 ## BLUF
 
@@ -25,7 +25,7 @@ Only SecretFlow protocol traffic and metadata may cross the network.
 - `run_2party_psi_peer.py`: party-local PSI runner
 - `write_peer_psi_session.py`: writes the shared session file
 - `verify_peer_psi_receipts.py`: verifies the two party-local receipts agree on the same result
-- `strict_network_poc.py`: local two-container demo of the strict-trust model
+- `distributed_network_poc.py`: local two-container demo of the distributed model
 
 ## Session File
 
@@ -89,7 +89,7 @@ The evidence does not support these stronger statements:
 Run:
 
 ```bash
-python3 strict_network_poc.py
+python3 distributed_network_poc.py
 ```
 
 The demo starts two Docker containers:

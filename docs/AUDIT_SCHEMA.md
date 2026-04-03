@@ -6,7 +6,7 @@
 
 It records what inputs were used, what output was produced, and what exact runner code generated the artifact. It does not prove anything about remote peer trust boundaries by itself.
 
-For the strict-trust distributed mode, the relevant evidence is the pair of party-local receipts plus the receipt comparison step.
+For the distributed mode, the relevant evidence is the pair of party-local receipts plus the receipt comparison step.
 
 ## Standalone Audit
 
@@ -82,9 +82,9 @@ This file supports a narrow claim:
 - it produced this specific output
 - the output matched a local plaintext recomputation of the intersection
 
-## Distributed Strict-Trust Mode
+## Distributed Mode
 
-The strict-trust distributed mode uses party-local receipts instead of any centralized verification receipt file.
+The distributed mode uses party-local receipts instead of any centralized verification receipt file.
 
 Instead, each party writes its own local receipt and `verify_peer_psi_receipts.py` confirms that both sides:
 

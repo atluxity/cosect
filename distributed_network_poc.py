@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run a strict-trust two-party PSI demo with two Docker containers and no centralized plaintext upload."""
+"""Run a distributed two-party PSI demo with two Docker containers and no centralized plaintext upload."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parent
 DEFAULT_IMAGE = "secretflow/secretflow-anolis8:latest"
 DEFAULT_PARTY_A = ROOT / "data" / "list_a_200_popular_domains.csv"
 DEFAULT_PARTY_B = ROOT / "data" / "list_b_60_mixed.csv"
-DEFAULT_OUT_ROOT = ROOT / "out" / "strict_network_poc"
+DEFAULT_OUT_ROOT = ROOT / "out" / "distributed_network_poc"
 
 
 def run(command: list[str]) -> None:
@@ -167,7 +167,7 @@ def main() -> int:
     summary = json.loads(summary_raw)
 
     print()
-    print("Strict-trust PSI demo")
+    print("Distributed PSI demo")
     print(f"job id: {args.job_id}")
     print(f"party_a receipt: {party_a_dir / 'output' / 'party_a_receipt.json'}")
     print(f"party_b receipt: {party_b_dir / 'output' / 'party_b_receipt.json'}")

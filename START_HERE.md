@@ -2,9 +2,9 @@
 
 ## BLUF
 
-If you care about the actual trust boundary, use the strict-trust remote path, not the standalone path.
+If you care about the actual trust boundary, use the distributed remote path, not the standalone path.
 
-The strict-trust path keeps Party A plaintext on Party A's host and Party B plaintext on Party B's host. The standalone path is only for quick local validation on one machine.
+The distributed path keeps Party A plaintext on Party A's host and Party B plaintext on Party B's host. The standalone path is only for quick local validation on one machine.
 
 This repository includes sample CSV fixtures in `data/` and deeper operational docs in `docs/`.
 
@@ -58,7 +58,7 @@ example.com
 shared.example
 ```
 
-## Option 2: Strict-Trust Remote PSI
+## Option 2: Distributed Remote PSI
 
 Use this when the parties are semi-trusted and neither side may upload a plaintext CSV to the other side.
 
@@ -69,7 +69,7 @@ Requirements:
 Run:
 
 ```bash
-python3 strict_network_poc.py
+python3 distributed_network_poc.py
 ```
 
 What it does:
@@ -98,6 +98,6 @@ What to inspect after the run:
 
 - [README.md](README.md): overview
 - [docs/NETWORK_MVP.md](docs/NETWORK_MVP.md): network shape and trust boundary
-- [docs/STRICT_TRUST_MODE.md](docs/STRICT_TRUST_MODE.md): architecture for semi-trusted remote peers
+- [docs/DISTRIBUTED_MODE.md](docs/DISTRIBUTED_MODE.md): architecture for semi-trusted remote peers
 - [docs/AUDIT_SCHEMA.md](docs/AUDIT_SCHEMA.md): audit and verification receipt fields
 - [docs/MVP_SPEC.md](docs/MVP_SPEC.md): acceptance criteria and deferred work

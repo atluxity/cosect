@@ -65,7 +65,7 @@ The plaintext CSV stays only on the host that owns it.
 
 ## Minimal Security Model
 
-For the first strict-trust networked version, assume:
+For the first distributed networked version, assume:
 
 - fixed peer identities
 - TLS between peers
