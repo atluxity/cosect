@@ -34,11 +34,11 @@ Each party receives a local CSV containing only the intersecting `domain` values
 - Neither party transmits a plaintext full customer list to the other.
 - Both parties receive the same intersection result.
 - The run produces an audit trail with file hashes and row counts.
+- The remote workflow can execute across two real party-local runners without a coordinator staging both plaintext inputs.
 - The workflow is simple enough to explain to non-cryptographers.
 
 ## Deferred Work
 
-- remote orchestration between real hosts
 - mTLS, pinned TLS, and firewall rules
 - anti-abuse controls
 - repeated-run policy

@@ -4,6 +4,10 @@
 
 `coordinator.py` is the first network wrapper around the existing local SecretFlow workflow. It exposes a small HTTP job API and maps each action onto the current scripts and run-directory layout.
 
+This coordinator stores uploaded plaintext CSV files on the coordinator host. That makes it unsuitable for the stricter semi-trusted-peer model where neither side may reveal its full plaintext list to infrastructure controlled by the other party.
+
+Use [STRICT_TRUST_MODE.md](STRICT_TRUST_MODE.md) for that architecture.
+
 ## Start
 
 ```bash
@@ -78,6 +82,16 @@ curl http://127.0.0.1:8080/jobs/psi-demo-1/results/party_a -H 'X-API-Key: party-
 curl http://127.0.0.1:8080/jobs/psi-demo-1/results/party_b -H 'X-API-Key: party-b-demo-key'
 ```
 
+After the verify step, inspect `runs/<job_id>/output/verification.json`.
+
+That receipt is written by `verify_run.py` and records:
+
+- manifest SHA-256
+- audit SHA-256
+- input and output SHA-256 values
+- recomputed plaintext intersection row count and SHA-256
+- whether the produced output exactly matches the independently recomputed intersection
+
 Archive the run:
 
 ```bash
@@ -99,6 +113,7 @@ curl -X POST http://127.0.0.1:8080/admin/cleanup \
 - it uses the existing scripts and Docker workflow directly
 - it is meant for a private network or localhost testing, not public exposure
 - API keys are a temporary control for testing; use TLS plus stronger client identity in production
+- the verify step produces a concrete receipt, but not a cryptographic attestation against a malicious host
 - see `docs/DEPLOYMENT.md` for reverse-proxy and TLS assumptions
 
 ## Integration Script

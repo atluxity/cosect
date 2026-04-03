@@ -4,6 +4,8 @@
 
 This is the first network contract for the coordinator wrapper. It is a job API, not a generic PSI computation API.
 
+This contract describes the coordinator-staged workflow only. It is not the strict-trust architecture for semi-trusted peers, because the coordinator receives plaintext CSV uploads in this model.
+
 ## Endpoints
 
 ### `POST /jobs`
@@ -72,6 +74,11 @@ Response:
 
 Run the existing `verify_run.py` step.
 
+Side effect:
+
+- write `runs/<job_id>/output/verification.json`
+- verify that the produced output CSVs match an independently recomputed plaintext intersection of the staged inputs
+
 ### `GET /jobs/{job_id}`
 
 Return job status and artifact presence.
@@ -104,6 +111,15 @@ Download Party B intersection CSV.
 ### `GET /jobs/{job_id}/audit`
 
 Download `audit.json`.
+
+The audit includes:
+
+- input hashes
+- output hash
+- SecretFlow per-party counts
+- execution timing
+- SecretFlow version
+- runner and validator script hashes
 
 ### `POST /jobs/{job_id}/archive`
 

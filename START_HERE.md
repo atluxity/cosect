@@ -23,6 +23,7 @@ What it does:
 - uses the built-in 200-vs-60 mixed fixture
 - runs the SecretFlow PSI flow locally in Docker
 - prints the intersection summary and matching domains
+- writes `poc_output/audit.json` with input and output hashes plus execution metadata
 
 Use your own CSVs:
 
@@ -49,7 +50,7 @@ shared.example
 
 ## Option 2: Local HTTP Coordinator
 
-Use this if you want to test the networked job model on one machine first.
+Use this only if you want to test the older networked workflow wrapper on one machine first.
 
 Requirements:
 
@@ -83,6 +84,33 @@ python3 http_integration_test.py \
   --party-b-api-key replace-party-b-key
 ```
 
+After `POST /verify`, inspect `runs/<job_id>/output/verification.json`. That receipt records the manifest hash, audit hash, input and output hashes, and whether the output exactly matches an independently recomputed plaintext intersection of the staged inputs.
+
+This mode uploads both plaintext CSVs to the coordinator host. It is not suitable when Party A must not reveal its plaintext list to Party B's infrastructure, or vice versa.
+
+## Option 3: Strict-Trust Remote PSI
+
+Use this when the parties are only semi-trusted and neither side may upload a plaintext CSV to the other side.
+
+Requirements:
+
+- Docker installed
+
+Run:
+
+```bash
+python3 strict_network_poc.py
+```
+
+What it does:
+
+- starts one SecretFlow container for Party A and one for Party B
+- mounts Party A plaintext only into Party A's container
+- mounts Party B plaintext only into Party B's container
+- shares only a session file with addresses and file locations
+- runs SecretFlow in production mode across the two parties
+- writes one local receipt per party and verifies that the receipts agree on the same output
+
 ## Built-In Test Data
 
 - `data/list_a_200_popular_domains.csv`: 200 popular domains
@@ -95,5 +123,7 @@ python3 http_integration_test.py \
 - [README.md](README.md): overview
 - [docs/COORDINATOR.md](docs/COORDINATOR.md): coordinator usage
 - [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md): reverse-proxy and TLS assumptions
+- [docs/STRICT_TRUST_MODE.md](docs/STRICT_TRUST_MODE.md): architecture for semi-trusted remote peers
+- [docs/AUDIT_SCHEMA.md](docs/AUDIT_SCHEMA.md): audit and verification receipt fields
 - [docs/SECURITY_CHECKLIST.md](docs/SECURITY_CHECKLIST.md): operational safety checks
 - [docs/RETENTION.md](docs/RETENTION.md): retention modes

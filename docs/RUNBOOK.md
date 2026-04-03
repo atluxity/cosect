@@ -2,6 +2,10 @@
 
 ## Operating Model
 
+This runbook applies to the local or coordinator-staged workflow where both normalized inputs are present in one run directory.
+
+For the semi-trusted remote architecture where neither side may upload plaintext CSVs to the other side, use [STRICT_TRUST_MODE.md](STRICT_TRUST_MODE.md) instead.
+
 Party A and Party B each prepare their own local `domain` CSV. Neither side sends the raw CSV to the other. Both sides run the same PSI job configuration and receive only the intersection result.
 
 ## Workflow
@@ -15,7 +19,8 @@ Party A and Party B each prepare their own local `domain` CSV. Neither side send
 7. Record the output file SHA-256 and intersection count.
 8. Review the resulting intersection CSV.
 9. Run `verify_run.py`.
-10. Archive the completed run directory.
+10. Inspect `output/verification.json` and confirm that `output_matches_plaintext_intersection` is `true`.
+11. Archive the completed run directory.
 
 ## Audit Fields
 
@@ -31,10 +36,14 @@ Capture these values for each run:
 - output row count
 - output SHA-256
 - manifest path
+- verification receipt path
+- recomputed plaintext intersection SHA-256
 
 ## Trust Statement
 
 This MVP supports the statement: neither party transmitted its full customer list to the other in plaintext. Each party supplied only its own local input into the PSI protocol and received only the overlap.
+
+It also supports a narrower verification statement: the retained output matches the independently recomputed plaintext intersection of the staged normalized inputs for that job.
 
 ## Known Limits
 
