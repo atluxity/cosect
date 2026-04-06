@@ -146,6 +146,32 @@ We verified both OpenMined entry points in this repository:
 
 That gives us confidence that the engine works within the repository's actual operator flow rather than only as a toy library import.
 
+### 6. Packet-Capture Inspection
+
+We captured and inspected network traffic during the distributed OpenMined demo.
+
+That work is summarized in `docs/OPENMINED_WIRE_TRAFFIC_NOTES.md`.
+
+What we observed:
+
+- real peer-to-peer traffic during PSI
+- readable JSON wrapper messages on the wire
+- the final overlap returned in clear JSON
+- no full Party A or Party B input lists in the readable payloads we extracted
+
+### 7. Canary Runs
+
+We ran packet captures with unique canary domains on each side and one shared canary.
+
+What we found:
+
+- the shared canary appeared in the `intersection_rows` message, exactly as expected
+- the A-only and B-only canaries did not appear in the readable payloads we extracted
+
+That is not a proof that unique values never cross the wire in encoded form.
+
+It is still useful evidence that the current wrapper is not exposing the full input lists in obvious readable form.
+
 ## What We Are Actually Claiming
 
 The right claim is narrow.
@@ -167,8 +193,6 @@ We are not claiming:
 - proof that host machines were honest or untampered
 - proof that the current local socket transport hides metadata from a network observer
 
-We also have not yet done the same packet-capture and canary-analysis work for the OpenMined backend that we did for the SecretFlow backend.
-
 ## Current Bottom Line
 
 As of 2026-04-06, the practical trust position for this repository is:
@@ -178,6 +202,7 @@ As of 2026-04-06, the practical trust position for this repository is:
 - we did not find a public independent audit of OpenMined PSI
 - our own integration work keeps each party's plaintext local
 - our own end-to-end checks show that both parties still end with the same result and matching receipts
+- our own packet captures show the final overlap on the wire, but not the full input lists in the readable payloads we extracted
 
 That is enough to stand behind the integration story.
 

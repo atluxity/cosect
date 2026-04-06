@@ -120,3 +120,5 @@ What to inspect after the run:
 - [docs/ENGINE_OPTIONS.md](docs/ENGINE_OPTIONS.md): current backend choices and tradeoffs
 - [docs/SECRETFLOW_DUE_DILIGENCE.md](docs/SECRETFLOW_DUE_DILIGENCE.md): due-diligence notes on the SecretFlow backend
 - [docs/OPENMINED_DUE_DILIGENCE.md](docs/OPENMINED_DUE_DILIGENCE.md): due-diligence notes on the OpenMined backend
+- [docs/WIRE_TRAFFIC_NOTES.md](docs/WIRE_TRAFFIC_NOTES.md): SecretFlow wire observations
+- [docs/OPENMINED_WIRE_TRAFFIC_NOTES.md](docs/OPENMINED_WIRE_TRAFFIC_NOTES.md): OpenMined wire observations
