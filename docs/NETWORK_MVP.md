@@ -36,7 +36,7 @@ The shared session file contains only:
 - party network addresses
 - per-party local input and output file paths
 - per-party receipt file paths
-- SPU node addresses
+- SPU node addresses when the engine needs them
 
 The plaintext CSV stays only on the host that owns it.
 
@@ -63,6 +63,13 @@ The plaintext CSV stays only on the host that owns it.
 6. The selected PSI engine runs across the two parties.
 7. Each party writes its own local receipt.
 8. Compare the two receipts with `verify_peer_psi_receipts.py`.
+
+For the OpenMined backend, the engine run is asymmetric:
+
+- Party A acts as server
+- Party B acts as client
+- Party B learns the intersection first
+- Party B then sends the final result back to Party A
 
 ## Minimal Security Model
 

@@ -45,10 +45,11 @@ Before using live customer data:
 - run the workflow once with non-sensitive test data
 - confirm both sides get the same intersection CSV
 - confirm `audit.json` is produced for standalone mode, or party-local receipts are produced for distributed mode
+- confirm the chosen backend and protocol are recorded in the resulting audit or receipts
 
 ## First Real Run
 
 - create a dedicated run directory
 - place each party input under that run directory
-- run the containerized PSI command
+- run the chosen PSI command for the selected backend
 - archive the run directory after completion

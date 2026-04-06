@@ -114,4 +114,4 @@ With `engine=openmined`, the demo starts two local Python worker processes:
 
 That is the recommended proof-of-concept shape for semi-trusted peers in this repository.
 
-At the moment, the working backend is SecretFlow. See [ENGINE_OPTIONS.md](ENGINE_OPTIONS.md) for why that remains the default and which alternative is the most credible pivot target.
+See [ENGINE_OPTIONS.md](ENGINE_OPTIONS.md) for the current backend choices and their tradeoffs.

@@ -1,4 +1,4 @@
-# SecretFlow PSI MVP Spec
+# PSI MVP Spec
 
 ## BLUF
 
@@ -30,18 +30,29 @@ Each party provides a local CSV with a single `domain` column after normalizatio
 
 Each party receives a local CSV containing only the intersecting `domain` values.
 
-## Protocol
+## Engines
 
-- SecretFlow 2-party PSI
-- `key='domain'`
-- `broadcast_result=True`
-- default starting protocol: `KKRT_PSI_2PC`
+The repository currently supports:
 
-`KKRT_PSI_2PC` is the default starting point because the dataset sizes are modest and the goal is a practical MVP. Protocol experimentation is outside the scope of this repo.
+- `secretflow`
+- `openmined`
+
+Current engine defaults:
+
+- `secretflow`: `KKRT_PSI_2PC`
+- `openmined`: `OPENMINED_ECDH`
+
+The two engines have different shapes:
+
+- SecretFlow uses a mutual-output distributed PSI flow
+- OpenMined uses an asymmetric client/server PSI flow, then sends the final result back so both parties end with the same output file
+
+Protocol experimentation beyond those working defaults is outside the scope of this repo.
 
 ## Acceptance Criteria
 
 - Both parties can run the workflow on local CSV inputs.
+- Both supported engines can produce the same exact intersection on the built-in fixtures.
 - Neither party transmits a plaintext full customer list to the other.
 - Both parties receive the same intersection result.
 - The run produces an audit trail with file hashes and row counts.

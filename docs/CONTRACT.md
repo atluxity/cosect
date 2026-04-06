@@ -2,7 +2,9 @@
 
 ## Purpose
 
-This contract defines the local, file-based interface for the SecretFlow PSI MVP. It must remain stable before any network wrapper is built.
+This contract defines the local, file-based interface for the PSI MVP, independent of backend.
+
+The input and output file contract should remain stable even if the PSI engine changes.
 
 ## Input Files
 
@@ -50,7 +52,7 @@ Intersection CSV contract:
 
 - one `domain` column
 - sorted ascending
-- identical content for both parties in the local MVP
+- identical content for both parties after the run completes
 
 ## Job Identity
 
@@ -70,4 +72,5 @@ After PSI runs:
 
 - both output CSVs must exist
 - both output CSVs must be byte-identical
-- audit JSON must exist and record hashes and row counts
+- audit JSON must exist in standalone mode and record hashes and row counts
+- per-party receipts must exist in distributed mode and agree on the same session and result
