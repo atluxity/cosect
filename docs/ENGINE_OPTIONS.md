@@ -91,3 +91,20 @@ Keep both backends available.
 Use SecretFlow when you want the current distributed stack with the existing packet-capture and due-diligence work.
 
 Use OpenMined when you want a smaller dependency and a simpler story about what cryptographic building blocks are in use.
+
+## Short Comparison
+
+For this repository, the two engines are close in business outcome and different in shape.
+
+- SecretFlow is the more naturally symmetric path. Both parties get the result as part of the engine's own flow.
+- OpenMined is asymmetric. In this repository, Party B learns the result first and then sends it back so both sides end with the same output file and receipt.
+- SecretFlow has the heavier runtime and dependency footprint.
+- OpenMined has the smaller and easier-to-explain code surface.
+- SecretFlow has been exercised more deeply in this repository over time.
+- OpenMined now has working standalone and distributed paths plus packet-capture and canary checks, but it still has less history here.
+
+So the difference is not "one works and one does not." The real difference is:
+
+- symmetric engine flow versus asymmetric engine flow
+- heavier stack versus lighter library
+- different upstream trust choices
