@@ -27,6 +27,8 @@ It does not claim to establish that SecretFlow PSI is free of bugs, side channel
 
 SecretFlow is an open-source project led by Ant Group.
 
+For some readers, the important background fact is that this places the project inside the orbit of a large Chinese technology and financial-services company.
+
 Useful public signals:
 
 - the `secretflow` GitHub organization is verified and tied to `service.alipay.com`

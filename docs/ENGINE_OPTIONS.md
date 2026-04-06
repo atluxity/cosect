@@ -109,3 +109,20 @@ So the difference is not "one works and one does not." The real difference is:
 - symmetric engine flow versus asymmetric engine flow
 - heavier stack versus lighter library
 - different upstream organizations and trust choices
+
+## Geopolitical Context
+
+Some audiences will care about the upstream organizations in a geopolitical sense, not just a technical one.
+
+- SecretFlow is part of an ecosystem led by Ant Group, a large Chinese technology and financial-services company based in Hangzhou.
+- OpenMined PSI comes from the OpenMined ecosystem, a 501(c)(3) non-profit open-source organization with a public-good framing and a more Western non-profit institutional profile.
+
+That does not settle the technical question by itself.
+
+It does change the non-technical trust discussion:
+
+- vendor-backed Chinese industrial platform versus non-profit open-source community
+- larger corporate ecosystem versus narrower public-interest ecosystem
+- different legal, regulatory, and reputational environments around the upstreams
+
+For some stakeholders, that difference will matter as much as protocol shape or runtime complexity.

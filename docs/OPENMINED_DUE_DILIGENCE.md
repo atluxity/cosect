@@ -27,6 +27,8 @@ It does not claim to establish that OpenMined PSI is free of bugs, side channels
 
 OpenMined PSI is part of the OpenMined open-source ecosystem.
 
+For some readers, the important background fact is that this places the project in a very different institutional setting from SecretFlow: an open-source non-profit community rather than a large Chinese corporate platform.
+
 Useful public signals:
 
 - the `openmined` GitHub organization is verified
