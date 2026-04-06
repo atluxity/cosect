@@ -109,3 +109,35 @@ Deeper inspection also showed that at least one result broadcast packet carried 
 - `example.org`
 
 If reducing wire-visible metadata matters, the next step is to enable TLS for the distributed transport and repeat the same capture comparison.
+
+## Canary Comparison
+
+Two additional captures were taken with small canary inputs to see whether unique non-overlap values would appear in readable payloads.
+
+Run 1 used:
+
+- Party A only: `a-only-canary-001.example`
+- Party B only: `b-only-canary-001.example`
+- Shared value: `shared-canary-001.example`
+
+Run 2 used:
+
+- Party A only: `a-only-canary-002.example`
+- Party B only: `b-only-canary-002.example`
+- Shared value: `shared-canary-002.example`
+
+In both captures, the readable result-bearing packet was again the `root:8:BCAST` step.
+
+Observed broadcast values:
+
+- Run 1: `c2hhcmVkLWNhbmFyeS0wMDEuZXhhbXBsZQ==` -> `shared-canary-001.example`
+- Run 2: `c2hhcmVkLWNhbmFyeS0wMDIuZXhhbXBsZQ==` -> `shared-canary-002.example`
+
+The unique canaries did not appear in the readable or base64-decoded payloads that were extracted from the captures:
+
+- `a-only-canary-001.example`
+- `b-only-canary-001.example`
+- `a-only-canary-002.example`
+- `b-only-canary-002.example`
+
+This does not prove that unique input values never cross the wire in opaque binary form. It does strengthen the case that the readable value-bearing traffic is dominated by the final overlap rather than the full input lists.
