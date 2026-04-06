@@ -119,3 +119,4 @@ What to inspect after the run:
 - [docs/MVP_SPEC.md](docs/MVP_SPEC.md): acceptance criteria and deferred work
 - [docs/ENGINE_OPTIONS.md](docs/ENGINE_OPTIONS.md): current backend choices and tradeoffs
 - [docs/SECRETFLOW_DUE_DILIGENCE.md](docs/SECRETFLOW_DUE_DILIGENCE.md): due-diligence notes on the SecretFlow backend
+- [docs/OPENMINED_DUE_DILIGENCE.md](docs/OPENMINED_DUE_DILIGENCE.md): due-diligence notes on the OpenMined backend

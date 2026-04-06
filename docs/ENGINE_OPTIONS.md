@@ -42,6 +42,10 @@ Why it is still uncomfortable:
 - the implementation details are hard to stand behind without leaning on the upstream project
 - the upstream trust story is tied to Ant Group and the wider SecretFlow ecosystem
 
+Due-diligence note:
+
+- [SECRETFLOW_DUE_DILIGENCE.md](SECRETFLOW_DUE_DILIGENCE.md)
+
 ## OpenMined PSI
 
 Why it looks promising:
@@ -62,6 +66,10 @@ What is still rough:
 - the distributed OpenMined demo currently uses local Python worker processes rather than Docker containers
 - TLS is not implemented for the OpenMined transport in this repository
 - the asymmetric flow is a little less intuitive than the SecretFlow mutual-output path
+
+Due-diligence note:
+
+- [OPENMINED_DUE_DILIGENCE.md](OPENMINED_DUE_DILIGENCE.md)
 
 ## Secondary Candidate: Microsoft APSI
 
