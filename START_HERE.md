@@ -8,13 +8,16 @@ In the distributed path, Party A keeps its plaintext on Party A's host and Party
 
 This repository includes sample CSV fixtures in `data/` and deeper operational docs in `docs/`.
 
+The repository currently supports `secretflow` and `openmined`.
+
 ## Option 1: Standalone Local Demo
 
 Use this for the fastest one-host sanity check.
 
 Requirements:
 
-- Docker installed
+- Docker installed for `engine=secretflow`
+- `.venv-openmined` with `openmined-psi` installed for `engine=openmined`
 
 Run:
 
@@ -22,12 +25,18 @@ Run:
 python3 standalone_poc.py --pull
 ```
 
+Or:
+
+```bash
+python3 standalone_poc.py --engine openmined
+```
+
 What it does:
 
 - uses the built-in 200-vs-60 mixed fixture
-- runs the SecretFlow PSI flow locally in Docker
+- runs the selected PSI engine locally
 - prints the intersection summary and matching domains
-- writes `poc_output/audit.json` with input and output hashes plus execution metadata
+- writes an `audit.json` file with input and output hashes plus execution metadata
 
 What it leaves out:
 
@@ -64,7 +73,8 @@ Use this when the parties are semi-trusted and neither side may upload a plainte
 
 Requirements:
 
-- Docker installed
+- Docker installed for `engine=secretflow`
+- `.venv-openmined` with `openmined-psi` installed for `engine=openmined`
 
 Run:
 
@@ -72,13 +82,19 @@ Run:
 python3 distributed_network_poc.py
 ```
 
+Or:
+
+```bash
+python3 distributed_network_poc.py --engine openmined
+```
+
 What it does:
 
-- starts one SecretFlow container for Party A and one for Party B
-- mounts Party A plaintext only into Party A's container
-- mounts Party B plaintext only into Party B's container
+- starts one worker for Party A and one for Party B
+- keeps Party A plaintext local to Party A's side
+- keeps Party B plaintext local to Party B's side
 - shares only a session file with addresses and file locations
-- runs SecretFlow in production mode across the two parties
+- runs the selected PSI engine across the two parties
 - writes one local receipt per party and verifies that the receipts agree on the same output
 
 What to inspect after the run:
@@ -101,3 +117,5 @@ What to inspect after the run:
 - [docs/DISTRIBUTED_MODE.md](docs/DISTRIBUTED_MODE.md): architecture for semi-trusted remote peers
 - [docs/AUDIT_SCHEMA.md](docs/AUDIT_SCHEMA.md): audit and verification receipt fields
 - [docs/MVP_SPEC.md](docs/MVP_SPEC.md): acceptance criteria and deferred work
+- [docs/ENGINE_OPTIONS.md](docs/ENGINE_OPTIONS.md): current backend choices and tradeoffs
+- [docs/SECRETFLOW_DUE_DILIGENCE.md](docs/SECRETFLOW_DUE_DILIGENCE.md): due-diligence notes on the SecretFlow backend

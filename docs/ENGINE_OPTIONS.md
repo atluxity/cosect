@@ -1,0 +1,85 @@
+# Engine Options
+
+## BLUF
+
+This repository currently supports two backends:
+
+- SecretFlow
+- OpenMined PSI
+
+SecretFlow remains the heavier backend.
+
+OpenMined PSI is now implemented as the lighter asymmetric alternative.
+
+## What We Need From A Backend
+
+For this repository, a replacement engine needs to support:
+
+- two-party PSI
+- party-local plaintext inputs
+- direct network exchange between the parties
+- a simple way to explain what crosses the wire
+- a practical integration path from Python and Docker
+
+The current operator model also expects:
+
+- one local output per party
+- one local receipt per party
+- no centralized service staging both plaintext inputs
+
+## SecretFlow
+
+Why it stays in the repo for now:
+
+- it already works end to end
+- it matches the current trust boundary
+- it has open source code, public docs, and an active upstream
+- it gave us real distributed packet captures to inspect
+
+Why it is still uncomfortable:
+
+- it is a large stack for a narrow PSI problem
+- the implementation details are hard to stand behind without leaning on the upstream project
+- the upstream trust story is tied to Ant Group and the wider SecretFlow ecosystem
+
+## OpenMined PSI
+
+Why it looks promising:
+
+- it is a narrower PSI library rather than a broad privacy-compute platform
+- the protocol story is easier to explain
+- the project is easier to describe to a skeptical reader than a larger SPU-based stack
+
+What changed in this repository to support it:
+
+- the API shape is client/server rather than the current SecretFlow peer runner
+- Party A acts as server in the distributed demo
+- Party B acts as client and learns the intersection first
+- Party B then returns the final intersection so both sides end with matching output files and receipts
+
+What is still rough:
+
+- the distributed OpenMined demo currently uses local Python worker processes rather than Docker containers
+- TLS is not implemented for the OpenMined transport in this repository
+- the asymmetric flow is a little less intuitive than the SecretFlow mutual-output path
+
+## Secondary Candidate: Microsoft APSI
+
+Why it is interesting:
+
+- it is a serious open-source PSI project
+- it is narrower in scope than SecretFlow
+
+Why it is a weaker fit for this repository:
+
+- APSI is asymmetric by design
+- that is less natural for the current "both sides end with the same intersection" story
+- integrating it would likely change the operator story more than OpenMined PSI would
+
+## Practical Recommendation
+
+Keep both backends available.
+
+Use SecretFlow when you want the current distributed stack with the existing packet-capture and due-diligence work.
+
+Use OpenMined when you want a smaller dependency and a simpler story about what cryptographic building blocks are in use.

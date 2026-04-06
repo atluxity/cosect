@@ -10,7 +10,7 @@ If any shared service receives both plaintext CSVs, the trust boundary has alrea
 
 ## Goal
 
-Run SecretFlow PSI between two real hosts without uploading either party's plaintext CSV to any centralized service or the other party.
+Run PSI between two real hosts without uploading either party's plaintext CSV to any centralized service or the other party.
 
 The network layer should orchestrate:
 
@@ -26,11 +26,12 @@ It should not redefine normalization or file formats.
 
 Use two party-local runners plus an optional metadata-only control plane.
 
-Each party keeps its own normalized CSV locally and runs the same SecretFlow job code on its own host.
+Each party keeps its own normalized CSV locally and runs the same PSI job flow on its own host.
 
 The shared session file contains only:
 
 - job id
+- engine
 - protocol
 - party network addresses
 - per-party local input and output file paths
@@ -59,7 +60,7 @@ The plaintext CSV stays only on the host that owns it.
 3. Party A validates only Party A's local normalized CSV.
 4. Party B validates only Party B's local normalized CSV.
 5. Each party starts `run_2party_psi_peer.py` on its own host.
-6. SecretFlow runs PSI across the two parties.
+6. The selected PSI engine runs across the two parties.
 7. Each party writes its own local receipt.
 8. Compare the two receipts with `verify_peer_psi_receipts.py`.
 
@@ -72,7 +73,7 @@ For the initial distributed version, assume:
 - IP allowlists or VPN
 - no public internet exposure
 
-The local demo uses plaintext localhost transport inside one machine for convenience only. Real deployments should configure SecretFlow TLS and fixed peer identity.
+The local demo uses plaintext localhost transport inside one machine for convenience only. Real deployments should configure TLS and fixed peer identity for the selected backend.
 
 ## Hard Boundary
 

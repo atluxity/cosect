@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run a two-party SecretFlow PSI job with plaintext inputs kept on each party's own host."""
+"""Run a two-party PSI job with plaintext inputs kept on each party's own host."""
 
 from __future__ import annotations
 
@@ -13,6 +13,8 @@ import time
 from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
+
+from openmined_backend import openmined_client_exchange, openmined_server_exchange, read_domains, write_domains
 
 
 def sha256_file(path: Path) -> str:
@@ -33,10 +35,11 @@ def short_fingerprint(value: str, prefix: int = 16) -> str:
 
 
 def normalize_session(session: dict) -> dict:
-    required_top_level = {"job_id", "protocol", "parties", "spu"}
+    required_top_level = {"job_id", "protocol", "parties"}
     missing = required_top_level - set(session)
     if missing:
         raise SystemExit(f"session file missing keys: {', '.join(sorted(missing))}")
+    session.setdefault("engine", "secretflow")
     parties = session["parties"]
     if set(parties) != {"party_a", "party_b"}:
         raise SystemExit("session file must define exactly party_a and party_b")
@@ -44,12 +47,15 @@ def normalize_session(session: dict) -> dict:
         for field in ("address", "input_path", "output_path", "receipt_path"):
             if field not in party:
                 raise SystemExit(f"session file missing parties.{party_name}.{field}")
-    spu_nodes = session["spu"].get("nodes", {})
-    if set(spu_nodes) != {"party_a", "party_b"}:
-        raise SystemExit("session file must define spu.nodes for party_a and party_b")
-    for party_name, node in spu_nodes.items():
-        if "address" not in node:
-            raise SystemExit(f"session file missing spu.nodes.{party_name}.address")
+    if session["engine"] == "secretflow":
+        if "spu" not in session:
+            raise SystemExit("session file missing key: spu")
+        spu_nodes = session["spu"].get("nodes", {})
+        if set(spu_nodes) != {"party_a", "party_b"}:
+            raise SystemExit("session file must define spu.nodes for party_a and party_b")
+        for party_name, node in spu_nodes.items():
+            if "address" not in node:
+                raise SystemExit(f"session file missing spu.nodes.{party_name}.address")
     return session
 
 
@@ -129,57 +135,94 @@ def main() -> int:
     receipt_path.parent.mkdir(parents=True, exist_ok=True)
 
     print_step(self_party, f"job id: {session['job_id']}")
+    print_step(self_party, f"engine: {session['engine']}")
     print_step(self_party, f"session file: {session_path}")
     print_step(self_party, f"local input: {local_input_path} ({count_rows(local_input_path)} rows)")
     print_step(self_party, f"local output will be written to: {local_output_path}")
     print_step(self_party, "validating local input")
     validate_local_input(local_input_path)
 
-    try:
-        import secretflow as sf
-    except ImportError as exc:
-        raise SystemExit(
-            "SecretFlow is not installed. Run this inside the SecretFlow environment or container."
-        ) from exc
-
     start_monotonic = time.monotonic()
     started_at = datetime.now(timezone.utc)
-    print_step(self_party, "starting the local SecretFlow worker")
-    sf.init(
-        address=None,
-        cluster_config=cluster_config_for(session, self_party),
-        ray_mode=args.ray_mode,
-        cross_silo_comm_backend=session.get("cross_silo_comm_backend", "grpc"),
-        cross_silo_comm_options=session.get("cross_silo_comm_options"),
-        enable_waiting_for_other_parties_ready=session.get("enable_waiting_for_other_parties_ready", True),
-        tls_config=maybe_tls_config(session, self_party),
-        job_name=session["job_id"],
-    )
+    if session["engine"] == "secretflow":
+        try:
+            import secretflow as sf
+        except ImportError as exc:
+            raise SystemExit(
+                "SecretFlow is not installed. Run this inside the SecretFlow environment or container."
+            ) from exc
 
-    party_a = sf.PYU("party_a")
-    party_b = sf.PYU("party_b")
-    spu = sf.SPU(spu_cluster_def(sf, session))
-    input_path = {
-        party_a: session["parties"]["party_a"]["input_path"],
-        party_b: session["parties"]["party_b"]["input_path"],
-    }
-    output_path = {
-        party_a: session["parties"]["party_a"]["output_path"],
-        party_b: session["parties"]["party_b"]["output_path"],
-    }
+        print_step(self_party, "starting the local SecretFlow worker")
+        sf.init(
+            address=None,
+            cluster_config=cluster_config_for(session, self_party),
+            ray_mode=args.ray_mode,
+            cross_silo_comm_backend=session.get("cross_silo_comm_backend", "grpc"),
+            cross_silo_comm_options=session.get("cross_silo_comm_options"),
+            enable_waiting_for_other_parties_ready=session.get(
+                "enable_waiting_for_other_parties_ready", True
+            ),
+            tls_config=maybe_tls_config(session, self_party),
+            job_name=session["job_id"],
+        )
 
-    print_step(self_party, "connecting to the other party and running PSI")
-    print_step(self_party, "backend logs may appear while PSI is running")
-    reports = spu.psi_csv(
-        key="domain",
-        input_path=input_path,
-        output_path=output_path,
-        receiver="party_a",
-        protocol=session["protocol"],
-        precheck_input=True,
-        sort=True,
-        broadcast_result=True,
-    )
+        party_a = sf.PYU("party_a")
+        party_b = sf.PYU("party_b")
+        spu = sf.SPU(spu_cluster_def(sf, session))
+        input_path = {
+            party_a: session["parties"]["party_a"]["input_path"],
+            party_b: session["parties"]["party_b"]["input_path"],
+        }
+        output_path = {
+            party_a: session["parties"]["party_a"]["output_path"],
+            party_b: session["parties"]["party_b"]["output_path"],
+        }
+
+        print_step(self_party, "connecting to the other party and running PSI")
+        print_step(self_party, "backend logs may appear while PSI is running")
+        reports = spu.psi_csv(
+            key="domain",
+            input_path=input_path,
+            output_path=output_path,
+            receiver="party_a",
+            protocol=session["protocol"],
+            precheck_input=True,
+            sort=True,
+            broadcast_result=True,
+        )
+        engine_version = getattr(sf, "__version__", "unknown")
+    elif session["engine"] == "openmined":
+        local_domains = read_domains(local_input_path)
+        if self_party == "party_b":
+            print_step(self_party, "connecting to the other party and running OpenMined PSI")
+            print_step(self_party, "party_b acts as the OpenMined client and learns the result first")
+            intersection, reports, engine_version = openmined_client_exchange(
+                local_domains,
+                session["parties"]["party_a"]["address"],
+                session["protocol"],
+                "party_b",
+                "party_a",
+            )
+        else:
+            listen_address = session["parties"]["party_a"].get(
+                "listen_addr",
+                session["parties"]["party_a"]["address"],
+            )
+            print_step(self_party, f"waiting for the other party on {listen_address}")
+            print_step(self_party, "party_a acts as the OpenMined server and receives the final result last")
+            intersection, reports, engine_version = openmined_server_exchange(
+                local_domains,
+                listen_address,
+                session["protocol"],
+                "party_b",
+                "party_a",
+            )
+        write_domains(local_output_path, intersection)
+    else:
+        raise SystemExit(
+            f"unsupported engine: {session['engine']}. "
+            "Supported engines: secretflow, openmined."
+        )
     completed_at = datetime.now(timezone.utc)
     elapsed_seconds = round(time.monotonic() - start_monotonic, 3)
     print_step(self_party, f"distributed PSI completed in {elapsed_seconds:.1f}s")
@@ -192,6 +235,7 @@ def main() -> int:
     session_sha256 = sha256_file(session_path)
     receipt = {
         "job_id": session["job_id"],
+        "engine": session["engine"],
         "self_party": self_party,
         "session_file": str(session_path),
         "session_sha256": session_sha256,
@@ -201,7 +245,7 @@ def main() -> int:
             "completed_at_utc": completed_at.isoformat(),
             "duration_seconds": elapsed_seconds,
             "python_version": sys.version.split()[0],
-            "secretflow_version": getattr(sf, "__version__", "unknown"),
+            "engine_version": engine_version,
             "runner_sha256": sha256_file(Path(__file__)),
             "validator_sha256": sha256_file(Path(__file__).with_name("validate_inputs.py")),
         },
@@ -229,7 +273,8 @@ def main() -> int:
         )
         print_step(self_party, "status: success")
 
-    sf.shutdown()
+    if session["engine"] == "secretflow":
+        sf.shutdown()
     return 0
 
 

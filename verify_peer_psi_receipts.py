@@ -31,6 +31,7 @@ def main() -> int:
     expect(party_a["self_party"] == "party_a", "party_a receipt has wrong self_party")
     expect(party_b["self_party"] == "party_b", "party_b receipt has wrong self_party")
     expect(party_a["job_id"] == party_b["job_id"], "job_id mismatch between receipts")
+    expect(party_a["engine"] == party_b["engine"], "engine mismatch between receipts")
     expect(party_a["protocol"] == party_b["protocol"], "protocol mismatch between receipts")
     expect(
         party_a["session_sha256"] == party_b["session_sha256"],
@@ -47,6 +48,7 @@ def main() -> int:
 
     summary = {
         "job_id": party_a["job_id"],
+        "engine": party_a["engine"],
         "protocol": party_a["protocol"],
         "session_sha256": party_a["session_sha256"],
         "output_rows": party_a["local_output"]["rows"],

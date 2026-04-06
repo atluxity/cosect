@@ -18,13 +18,14 @@ For the distributed mode, the relevant record is the pair of party-local receipt
 {
   "job_id": "psi-20260331T143023Z",
   "timestamp_utc": "2026-03-31T14:30:28.002395+00:00",
+  "engine": "secretflow",
   "protocol": "KKRT_PSI_2PC",
   "execution": {
     "started_at_utc": "2026-03-31T14:30:23.102395+00:00",
     "completed_at_utc": "2026-03-31T14:30:28.002395+00:00",
     "duration_seconds": 4.9,
     "python_version": "3.10.12",
-    "secretflow_version": "x.y.z",
+    "engine_version": "x.y.z",
     "runner_sha256": "...",
     "validator_sha256": "..."
   },
@@ -59,7 +60,7 @@ For the distributed mode, the relevant record is the pair of party-local receipt
   "independent_verification": {
     "method": "sorted set intersection over normalized CSV inputs",
     "rows": 4,
-    "matches_secretflow_output": true
+    "matches_engine_output": true
   }
 }
 ```
@@ -68,9 +69,10 @@ For the distributed mode, the relevant record is the pair of party-local receipt
 
 - `job_id` uniquely identifies the run.
 - `timestamp_utc` is ISO 8601 UTC.
+- `engine` identifies the PSI backend used for the run.
 - `input_sha256` is the SHA-256 of each normalized input CSV.
 - `intersection.sha256` is the SHA-256 of the resulting intersection CSV.
-- `reports` records the per-party counts returned by SecretFlow.
+- `reports` records the per-party counts returned by the selected engine.
 - `execution` binds the audit to the exact runner and validator script content used for the run.
 - `independent_verification` records that the result was also checked against a plaintext recomputation of the intersection.
 
@@ -89,5 +91,6 @@ The distributed mode uses party-local receipts instead of any centralized verifi
 Instead, each party writes its own local receipt and `verify_peer_psi_receipts.py` confirms that both sides:
 
 - used the same session file
+- used the same engine
 - produced the same output SHA-256
 - produced the same output row count

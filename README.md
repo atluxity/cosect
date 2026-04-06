@@ -1,4 +1,4 @@
-# SecretFlow PSI POC
+# PSI POC
 
 This project is for the case where two organizations want to find the customers or domains they have in common, but neither side wants to hand over its full list to the other.
 
@@ -6,11 +6,18 @@ This project is for the case where two organizations want to find the customers 
 
 This repository implements a two-party PSI proof of concept for semi-trusted peers.
 
+The repository currently supports two backends:
+
+- `secretflow`
+- `openmined`
+
+Session files and run receipts carry an explicit `engine` field so the surrounding operator flow stays stable even when the PSI engine changes.
+
 In the remote setup, each side keeps its own CSV on its own machine. The two sides run the PSI process directly against each other. They do not send their full lists to a shared service, and no central system is allowed to hold both plaintext inputs.
 
 This repository shows that:
 
-- the parties can compute an exact set intersection with SecretFlow
+- the parties can compute an exact set intersection with more than one PSI backend
 - the remote flow can run with party-local plaintext only
 - both parties can retain receipts that bind the run to a specific session and output
 
@@ -35,11 +42,12 @@ python3 standalone_poc.py --pull
 - `data/`: built-in test fixtures and raw CSV templates
 - `docs/`: protocol, proof, and distributed network docs
 - `standalone_poc.py`: simplest local demo
-- `distributed_network_poc.py`: two-container distributed demo with no centralized plaintext CSV upload
+- `distributed_network_poc.py`: distributed demo with no centralized plaintext CSV upload
 - `run_2party_psi_peer.py`: production-mode party-local PSI runner for real two-host execution
 - `write_peer_psi_session.py`: shared session file generator for the distributed flow
 - `verify_peer_psi_receipts.py`: compares the two party-local receipts for the same distributed run
-- `run_2party_psi.py`: local single-host SecretFlow PSI runner for laptop demos
+- `run_2party_psi.py`: local single-host PSI runner for laptop demos
+- `openmined_backend.py`: OpenMined PSI adapter helpers
 
 ## Security Model
 
@@ -84,13 +92,21 @@ python3 standalone_poc.py --pull
 
 Use this only for local validation and operator orientation. It is not the remote trust-boundary story.
 
+For the OpenMined backend:
+
+```bash
+python3 standalone_poc.py --engine openmined
+```
+
 For the distributed remote model where neither party may upload plaintext CSVs to the other side:
 
 ```bash
 python3 distributed_network_poc.py
 ```
 
-That demo starts two separate SecretFlow containers. Each container mounts only its own party's plaintext CSV plus a shared session file. The parties then run SecretFlow in production mode against each other and produce matching receipts.
+With `engine=secretflow`, that demo starts two separate Docker containers and runs SecretFlow in production mode against the two mounted party-local inputs.
+
+With `engine=openmined`, it starts two local Python worker processes. Party A acts as the OpenMined server, Party B acts as the OpenMined client, Party B learns the intersection first, and then sends the final result back so both sides end with matching output files and receipts.
 
 ## Built-In Test Data
 
@@ -101,7 +117,8 @@ That demo starts two separate SecretFlow containers. Each container mounts only 
 
 ## Runtime Output
 
-- `poc_output/`: default output location for the standalone demo
+- `poc_output/`: default output location for the SecretFlow standalone demo
+- `poc_output_openmined/`: default output location for the OpenMined standalone demo
 - `out/distributed_network_poc/<job_id>/`: local demo output for the distributed network mode
 
 ## Evidence
@@ -109,11 +126,11 @@ That demo starts two separate SecretFlow containers. Each container mounts only 
 The repository produces records you can review after a run. Those records are useful for review, but they are not a self-proving security guarantee.
 Single-host standalone runs produce:
 
-- `output/audit.json`: input hashes, output hash, execution timing, SecretFlow version, and runner/validator hashes
+- `output/audit.json`: input hashes, output hash, execution timing, engine version, and runner/validator hashes
 
 Distributed runs produce:
 
-- `party_a_receipt.json`: Party A local receipt with input hash, output hash, session hash, execution metadata, and SecretFlow report counts
+- `party_a_receipt.json`: Party A local receipt with input hash, output hash, session hash, execution metadata, and engine report counts
 - `party_b_receipt.json`: Party B local receipt with the same structure
 
 `verify_peer_psi_receipts.py` checks that both receipts refer to the same session and agree on the same output hash and row count.
@@ -130,4 +147,4 @@ This repository is distributed under Apache License 2.0.
 
 ## Reference Docs
 
-See [docs/DISTRIBUTED_MODE.md](docs/DISTRIBUTED_MODE.md), [docs/NETWORK_MVP.md](docs/NETWORK_MVP.md), [docs/AUDIT_SCHEMA.md](docs/AUDIT_SCHEMA.md), and [docs/MVP_SPEC.md](docs/MVP_SPEC.md) for the deeper operational material.
+See [docs/DISTRIBUTED_MODE.md](docs/DISTRIBUTED_MODE.md), [docs/NETWORK_MVP.md](docs/NETWORK_MVP.md), [docs/AUDIT_SCHEMA.md](docs/AUDIT_SCHEMA.md), [docs/MVP_SPEC.md](docs/MVP_SPEC.md), [docs/ENGINE_OPTIONS.md](docs/ENGINE_OPTIONS.md), and [docs/SECRETFLOW_DUE_DILIGENCE.md](docs/SECRETFLOW_DUE_DILIGENCE.md) for the deeper operational material.

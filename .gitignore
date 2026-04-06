@@ -24,6 +24,7 @@ __pycache__/
 
 # Local Python environments
 .venv-secretflow/
+.venv-openmined/
 
 # C extensions
 *.so
@@ -34,4 +35,5 @@ __pycache__/
 # SecretFlow runtime artifacts
 out/
 poc_output/
+poc_output_openmined/
 spu.log

@@ -8,7 +8,7 @@ Party A plaintext remains on Party A infrastructure.
 
 Party B plaintext remains on Party B infrastructure.
 
-Only SecretFlow protocol traffic and shared session metadata cross the network.
+Only PSI protocol traffic and shared session metadata cross the network.
 
 This mode gives you a concrete record that both parties ran the same session and observed the same output. It does not answer questions about machine integrity or host tampering.
 
@@ -18,7 +18,7 @@ Party A plaintext stays on Party A's host.
 
 Party B plaintext stays on Party B's host.
 
-Only SecretFlow protocol traffic and metadata may cross the network.
+Only PSI protocol traffic, result-sharing traffic, and session metadata may cross the network.
 
 ## Components
 
@@ -32,9 +32,10 @@ Only SecretFlow protocol traffic and metadata may cross the network.
 The shared session file contains:
 
 - job id
+- engine
 - protocol
-- Party A and Party B network addresses for SecretFlow production mode
-- Party A and Party B SPU node addresses
+- Party A and Party B network addresses for the selected engine
+- SPU node addresses when the engine is SecretFlow
 - per-party local input path
 - per-party local output path
 - per-party local receipt path
@@ -48,9 +49,16 @@ The session file is metadata only. Plaintext domains are not stored in it.
 3. Both parties receive the same shared session file.
 4. Party A runs `run_2party_psi_peer.py --party party_a --session-file ...`.
 5. Party B runs `run_2party_psi_peer.py --party party_b --session-file ...`.
-6. SecretFlow runs PSI in production mode across the two hosts.
+6. The selected PSI engine runs across the two hosts.
 7. Each party writes its own local output CSV and local receipt.
 8. Compare the two receipts with `verify_peer_psi_receipts.py`.
+
+For the OpenMined backend, the distributed demo uses an asymmetric split:
+
+- Party A acts as the OpenMined server
+- Party B acts as the OpenMined client
+- Party B learns the intersection first
+- Party B then sends the final intersection back to Party A so both sides end with the same output file
 
 ## Records Produced
 
@@ -60,9 +68,9 @@ Each party-local receipt records:
 - the local input SHA-256
 - the local output SHA-256
 - the output row count
-- SecretFlow version
+- engine-specific version information
 - runner and validator script hashes
-- SecretFlow-reported counts
+- engine-reported counts
 
 `verify_peer_psi_receipts.py` confirms:
 
@@ -92,10 +100,18 @@ Run:
 python3 distributed_network_poc.py
 ```
 
-The demo starts two Docker containers:
+With `engine=secretflow`, the demo starts two Docker containers:
 
 - Party A container mounts only Party A's plaintext input
 - Party B container mounts only Party B's plaintext input
 - both mount the shared session file
 
+With `engine=openmined`, the demo starts two local Python worker processes:
+
+- Party A reads only Party A's plaintext input
+- Party B reads only Party B's plaintext input
+- both read the same session file
+
 That is the recommended proof-of-concept shape for semi-trusted peers in this repository.
+
+At the moment, the working backend is SecretFlow. See [ENGINE_OPTIONS.md](ENGINE_OPTIONS.md) for why that remains the default and which alternative is the most credible pivot target.

@@ -47,6 +47,8 @@ def unused_tcp_port() -> int:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--job-id", default="psi-distributed-network-demo")
+    parser.add_argument("--engine", default="secretflow")
+    parser.add_argument("--protocol", default=None)
     parser.add_argument("--party-a", default=str(DEFAULT_PARTY_A))
     parser.add_argument("--party-b", default=str(DEFAULT_PARTY_B))
     parser.add_argument("--image", default=DEFAULT_IMAGE)
@@ -73,102 +75,160 @@ def main() -> int:
     party_b_spu_port = unused_tcp_port()
 
     session_path = shared_dir / "session.json"
-    run(
-        [
-            "python3",
-            str(ROOT / "write_peer_psi_session.py"),
-            "--job-id",
-            args.job_id,
-            "--session-file",
-            str(session_path),
-            "--party-a-address",
-            f"127.0.0.1:{party_a_port}",
-            "--party-b-address",
-            f"127.0.0.1:{party_b_port}",
-            "--party-a-listen-addr",
-            f"127.0.0.1:{party_a_port}",
-            "--party-b-listen-addr",
-            f"127.0.0.1:{party_b_port}",
-            "--party-a-spu-address",
-            f"127.0.0.1:{party_a_spu_port}",
-            "--party-b-spu-address",
-            f"127.0.0.1:{party_b_spu_port}",
-            "--party-a-input-path",
-            "/party_data/input/party_a_domains.csv",
-            "--party-b-input-path",
-            "/party_data/input/party_b_domains.csv",
-            "--party-a-output-path",
-            "/party_data/output/party_a_intersection.csv",
-            "--party-b-output-path",
-            "/party_data/output/party_b_intersection.csv",
-            "--party-a-receipt-path",
-            "/party_data/output/party_a_receipt.json",
-            "--party-b-receipt-path",
-            "/party_data/output/party_b_receipt.json",
-            "--quiet",
-        ]
-    )
+    session_command = [
+        "python3",
+        str(ROOT / "write_peer_psi_session.py"),
+        "--job-id",
+        args.job_id,
+        "--session-file",
+        str(session_path),
+        "--engine",
+        args.engine,
+        "--party-a-address",
+        f"127.0.0.1:{party_a_port}",
+        "--party-b-address",
+        f"127.0.0.1:{party_b_port}",
+        "--party-a-listen-addr",
+        f"127.0.0.1:{party_a_port}",
+        "--party-b-listen-addr",
+        f"127.0.0.1:{party_b_port}",
+        "--quiet",
+    ]
+    if args.protocol:
+        session_command.extend(["--protocol", args.protocol])
+    if args.engine == "secretflow":
+        session_command.extend(
+            [
+                "--party-a-spu-address",
+                f"127.0.0.1:{party_a_spu_port}",
+                "--party-b-spu-address",
+                f"127.0.0.1:{party_b_spu_port}",
+                "--party-a-input-path",
+                "/party_data/input/party_a_domains.csv",
+                "--party-b-input-path",
+                "/party_data/input/party_b_domains.csv",
+                "--party-a-output-path",
+                "/party_data/output/party_a_intersection.csv",
+                "--party-b-output-path",
+                "/party_data/output/party_b_intersection.csv",
+                "--party-a-receipt-path",
+                "/party_data/output/party_a_receipt.json",
+                "--party-b-receipt-path",
+                "/party_data/output/party_b_receipt.json",
+            ]
+        )
+    elif args.engine == "openmined":
+        session_command.extend(
+            [
+                "--party-a-input-path",
+                str(party_a_input),
+                "--party-b-input-path",
+                str(party_b_input),
+                "--party-a-output-path",
+                str(party_a_dir / "output" / "party_a_intersection.csv"),
+                "--party-b-output-path",
+                str(party_b_dir / "output" / "party_b_intersection.csv"),
+                "--party-a-receipt-path",
+                str(party_a_dir / "output" / "party_a_receipt.json"),
+                "--party-b-receipt-path",
+                str(party_b_dir / "output" / "party_b_receipt.json"),
+            ]
+        )
+    else:
+        raise SystemExit(f"unsupported engine: {args.engine}")
+    run(session_command)
 
-    if args.pull:
+    if args.pull and args.engine == "secretflow":
         print_step(f"pulling Docker image {args.image}")
         run(["docker", "pull", args.image])
 
     print_step(f"session file: {session_path}")
+    print_step(f"engine: {args.engine}")
     print_step(f"party_a input rows: {count_rows(party_a_input)}")
     print_step(f"party_b input rows: {count_rows(party_b_input)}")
-    print_step("starting Party A worker")
-    party_a_proc = subprocess.Popen(
-        [
-            "docker",
-            "run",
-            "--rm",
-            "--network",
-            "host",
-            "-v",
-            f"{ROOT}:/workspace",
-            "-v",
-            f"{shared_dir}:/shared",
-            "-v",
-            f"{party_a_dir}:/party_data",
-            "-w",
-            "/workspace",
-            "--entrypoint",
-            "python3",
-            args.image,
-            "run_2party_psi_peer.py",
-            "--party",
-            "party_a",
-            "--session-file",
-            "/shared/session.json",
-        ]
-    )
-    time.sleep(1.0)
-    print_step("starting Party B worker")
-    party_b_proc = subprocess.Popen(
-        [
-            "docker",
-            "run",
-            "--rm",
-            "--network",
-            "host",
-            "-v",
-            f"{ROOT}:/workspace",
-            "-v",
-            f"{shared_dir}:/shared",
-            "-v",
-            f"{party_b_dir}:/party_data",
-            "-w",
-            "/workspace",
-            "--entrypoint",
-            "python3",
-            args.image,
-            "run_2party_psi_peer.py",
-            "--party",
-            "party_b",
-            "--session-file",
-            "/shared/session.json",
-        ]
-    )
+    if args.engine == "secretflow":
+        print_step("starting Party A worker")
+        party_a_proc = subprocess.Popen(
+            [
+                "docker",
+                "run",
+                "--rm",
+                "--network",
+                "host",
+                "-v",
+                f"{ROOT}:/workspace",
+                "-v",
+                f"{shared_dir}:/shared",
+                "-v",
+                f"{party_a_dir}:/party_data",
+                "-w",
+                "/workspace",
+                "--entrypoint",
+                "python3",
+                args.image,
+                "run_2party_psi_peer.py",
+                "--party",
+                "party_a",
+                "--session-file",
+                "/shared/session.json",
+            ]
+        )
+        time.sleep(1.0)
+        print_step("starting Party B worker")
+        party_b_proc = subprocess.Popen(
+            [
+                "docker",
+                "run",
+                "--rm",
+                "--network",
+                "host",
+                "-v",
+                f"{ROOT}:/workspace",
+                "-v",
+                f"{shared_dir}:/shared",
+                "-v",
+                f"{party_b_dir}:/party_data",
+                "-w",
+                "/workspace",
+                "--entrypoint",
+                "python3",
+                args.image,
+                "run_2party_psi_peer.py",
+                "--party",
+                "party_b",
+                "--session-file",
+                "/shared/session.json",
+            ]
+        )
+    else:
+        openmined_python = ROOT / ".venv-openmined" / "bin" / "python"
+        if not openmined_python.exists():
+            raise SystemExit(
+                "OpenMined virtualenv is missing. Create .venv-openmined and install openmined-psi."
+            )
+        print_step("starting Party A worker")
+        party_a_proc = subprocess.Popen(
+            [
+                str(openmined_python),
+                str(ROOT / "run_2party_psi_peer.py"),
+                "--party",
+                "party_a",
+                "--session-file",
+                str(session_path),
+            ]
+        )
+        time.sleep(1.0)
+        print_step("starting Party B worker")
+        party_b_proc = subprocess.Popen(
+            [
+                str(openmined_python),
+                str(ROOT / "run_2party_psi_peer.py"),
+                "--party",
+                "party_b",
+                "--session-file",
+                str(session_path),
+            ]
+        )
 
     party_a_rc = party_a_proc.wait()
     party_b_rc = party_b_proc.wait()
@@ -192,6 +252,7 @@ def main() -> int:
     print()
     print("Distributed PSI demo")
     print(f"job id: {args.job_id}")
+    print(f"engine: {args.engine}")
     print(f"party_a receipt: {party_a_dir / 'output' / 'party_a_receipt.json'}")
     print(f"party_b receipt: {party_b_dir / 'output' / 'party_b_receipt.json'}")
     print(f"output rows: {summary['output_rows']}")

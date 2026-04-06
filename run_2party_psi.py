@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run a local two-party SecretFlow PSI job with mutual output."""
+"""Run a local two-party PSI job with mutual output."""
 
 from __future__ import annotations
 
@@ -11,6 +11,8 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+
+from openmined_backend import compute_local_intersection, read_domains, write_domains
 
 
 def sha256_file(path: Path) -> str:
@@ -27,11 +29,6 @@ def count_rows(path: Path) -> int:
         return sum(1 for _ in reader)
 
 
-def read_domains(path: Path) -> list[str]:
-    with path.open(newline="", encoding="utf-8") as infile:
-        return [row["domain"] for row in csv.DictReader(infile)]
-
-
 def expected_intersection(party_a_path: Path, party_b_path: Path) -> list[str]:
     return sorted(set(read_domains(party_a_path)) & set(read_domains(party_b_path)))
 
@@ -44,7 +41,7 @@ def ensure_identical_outputs(path_a: Path, path_b: Path) -> None:
 def validate_inputs(party_a_path: Path, party_b_path: Path) -> None:
     script_path = Path(__file__).with_name("validate_inputs.py")
     subprocess.run(
-        ["python", str(script_path), str(party_a_path), str(party_b_path)],
+        ["python3", str(script_path), str(party_a_path), str(party_b_path)],
         check=True,
     )
 
@@ -55,10 +52,11 @@ def main() -> int:
     parser.add_argument("--party-b", required=True, help="Normalized CSV for party B")
     parser.add_argument("--out-dir", required=True, help="Directory for PSI outputs")
     parser.add_argument("--job-id", default=None, help="Optional audit job id")
+    parser.add_argument("--engine", default="secretflow", help="PSI engine")
     parser.add_argument(
         "--protocol",
-        default="KKRT_PSI_2PC",
-        help="SecretFlow protocol, for example KKRT_PSI_2PC or ECDH_PSI_2PC",
+        default=None,
+        help="Engine-specific protocol, for example KKRT_PSI_2PC or ECDH_PSI_2PC",
     )
     parser.add_argument(
         "--print-audit-json",
@@ -71,6 +69,8 @@ def main() -> int:
         help="Suppress the normal completion summary",
     )
     args = parser.parse_args()
+    if args.protocol is None:
+        args.protocol = "OPENMINED_ECDH" if args.engine == "openmined" else "KKRT_PSI_2PC"
 
     party_a_path = Path(args.party_a).resolve()
     party_b_path = Path(args.party_b).resolve()
@@ -81,57 +81,76 @@ def main() -> int:
 
     validate_inputs(party_a_path, party_b_path)
 
-    try:
-        import secretflow as sf
-    except ImportError as exc:
+    party_a_output_path = out_dir / "party_a_intersection.csv"
+    party_b_output_path = out_dir / "party_b_intersection.csv"
+
+    if args.engine == "secretflow":
+        try:
+            import secretflow as sf
+        except ImportError as exc:
+            raise SystemExit(
+                "SecretFlow is not installed. Install it in a dedicated environment before running this script."
+            ) from exc
+
+        sf.init(parties=["party_a", "party_b"], address="local")
+
+        party_a = sf.PYU("party_a")
+        party_b = sf.PYU("party_b")
+        spu = sf.SPU(sf.utils.testing.cluster_def(["party_a", "party_b"]))
+
+        input_path = {
+            party_a: str(party_a_path),
+            party_b: str(party_b_path),
+        }
+        output_path = {
+            party_a: str(party_a_output_path),
+            party_b: str(party_b_output_path),
+        }
+
+        reports = spu.psi_csv(
+            key="domain",
+            input_path=input_path,
+            output_path=output_path,
+            receiver="party_a",
+            protocol=args.protocol,
+            precheck_input=True,
+            sort=True,
+            broadcast_result=True,
+        )
+        engine_version = getattr(sf, "__version__", "unknown")
+    elif args.engine == "openmined":
+        intersection, reports, engine_version = compute_local_intersection(
+            read_domains(party_a_path),
+            read_domains(party_b_path),
+            args.protocol,
+        )
+        write_domains(party_a_output_path, intersection)
+        write_domains(party_b_output_path, intersection)
+    else:
         raise SystemExit(
-            "SecretFlow is not installed. Install it in a dedicated environment before running this script."
-        ) from exc
+            f"unsupported engine: {args.engine}. "
+            "Supported engines: secretflow, openmined."
+        )
 
-    sf.init(parties=["party_a", "party_b"], address="local")
-
-    party_a = sf.PYU("party_a")
-    party_b = sf.PYU("party_b")
-    spu = sf.SPU(sf.utils.testing.cluster_def(["party_a", "party_b"]))
-
-    input_path = {
-        party_a: str(party_a_path),
-        party_b: str(party_b_path),
-    }
-    output_path = {
-        party_a: str(out_dir / "party_a_intersection.csv"),
-        party_b: str(out_dir / "party_b_intersection.csv"),
-    }
-
-    reports = spu.psi_csv(
-        key="domain",
-        input_path=input_path,
-        output_path=output_path,
-        receiver="party_a",
-        protocol=args.protocol,
-        precheck_input=True,
-        sort=True,
-        broadcast_result=True,
-    )
-
-    party_a_output_path = Path(output_path[party_a])
-    party_b_output_path = Path(output_path[party_b])
     expected_rows = expected_intersection(party_a_path, party_b_path)
     actual_rows = read_domains(party_a_output_path)
     if actual_rows != expected_rows:
-        raise SystemExit("SecretFlow output does not match the independently recomputed set intersection")
+        raise SystemExit(
+            f"{args.engine} output does not match the independently recomputed set intersection"
+        )
     completed_at = datetime.now(timezone.utc)
 
     audit = {
         "job_id": job_id,
         "timestamp_utc": completed_at.isoformat(),
+        "engine": args.engine,
         "protocol": args.protocol,
         "execution": {
             "started_at_utc": started_at.isoformat(),
             "completed_at_utc": completed_at.isoformat(),
             "duration_seconds": round((completed_at - started_at).total_seconds(), 3),
             "python_version": sys.version.split()[0],
-            "secretflow_version": getattr(sf, "__version__", "unknown"),
+            "engine_version": engine_version,
             "runner_sha256": sha256_file(Path(__file__)),
             "validator_sha256": sha256_file(Path(__file__).with_name("validate_inputs.py")),
         },
@@ -140,13 +159,13 @@ def main() -> int:
             "input_path": str(party_a_path),
             "input_rows": count_rows(party_a_path),
             "input_sha256": sha256_file(party_a_path),
-            "output_path": output_path[party_a],
+            "output_path": str(party_a_output_path),
         },
         "party_b": {
             "input_path": str(party_b_path),
             "input_rows": count_rows(party_b_path),
             "input_sha256": sha256_file(party_b_path),
-            "output_path": output_path[party_b],
+            "output_path": str(party_b_output_path),
         },
         "intersection": {
             "rows": count_rows(party_a_output_path),
@@ -155,7 +174,7 @@ def main() -> int:
         "independent_verification": {
             "method": "sorted set intersection over normalized CSV inputs",
             "rows": len(expected_rows),
-            "matches_secretflow_output": True,
+            "matches_engine_output": True,
         }
     }
 
@@ -172,13 +191,15 @@ def main() -> int:
     elif not args.quiet:
         print("PSI run completed")
         print(f"job id: {job_id}")
+        print(f"engine: {args.engine}")
         print(f"protocol: {args.protocol}")
         print(f"party_a rows: {audit['party_a']['input_rows']}")
         print(f"party_b rows: {audit['party_b']['input_rows']}")
         print(f"intersection rows: {audit['intersection']['rows']}")
         print(f"audit written to {audit_path}")
 
-    sf.shutdown()
+    if args.engine == "secretflow":
+        sf.shutdown()
     return 0
 
 
