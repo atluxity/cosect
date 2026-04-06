@@ -4,7 +4,7 @@
 
 `audit.json` is the review record for the standalone single-host path only.
 
-It records what inputs were used, what output was produced, and what exact runner code generated the artifact. By itself, it does not say anything about the remote peer trust boundary.
+It records what inputs were used, what output was produced, and what exact runner code generated the artifact. On its own, it says nothing about the remote peer trust boundary.
 
 For the distributed mode, the relevant record is the pair of party-local receipts plus the receipt comparison step.
 

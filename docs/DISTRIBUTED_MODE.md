@@ -10,7 +10,7 @@ Party B plaintext remains on Party B infrastructure.
 
 Only SecretFlow protocol traffic and shared session metadata cross the network.
 
-This mode gives you a concrete record that both parties ran the same session and observed the same output. It does not prove that the machines themselves were honest or untampered.
+This mode gives you a concrete record that both parties ran the same session and observed the same output. It does not answer questions about machine integrity or host tampering.
 
 ## Trust Boundary
 
@@ -39,7 +39,7 @@ The shared session file contains:
 - per-party local output path
 - per-party local receipt path
 
-The session file is metadata only. It does not contain plaintext domains.
+The session file is metadata only. Plaintext domains are not stored in it.
 
 ## Execution Sequence
 
@@ -78,7 +78,7 @@ These records support these statements:
 - each side retained its own plaintext locally
 - both sides reported the same result for the same session
 
-These records do not support these stronger statements:
+They are not enough to support stronger claims such as:
 
 - the host runtime was non-malicious
 - the operators did not collude

@@ -8,7 +8,7 @@ This repository implements a two-party PSI proof of concept for semi-trusted pee
 
 In the remote setup, each side keeps its own CSV on its own machine. The two sides run the PSI process directly against each other. They do not send their full lists to a shared service, and no central system is allowed to hold both plaintext inputs.
 
-This repository is intended to show three things:
+This repository shows that:
 
 - the parties can compute an exact set intersection with SecretFlow
 - the remote flow can run with party-local plaintext only
@@ -16,9 +16,9 @@ This repository is intended to show three things:
 
 Important limits:
 
-- This does not prove that the machines running the PSI code were honest or free from tampering.
-- This does not prevent one side from running too many jobs or using repeated runs to probe for changes over time.
-- This is not a production-ready security package by itself. Real deployment still needs transport security, peer authentication, authorization, rate limits, and operational controls.
+- It says nothing about whether the machines running the PSI code were honest or untampered.
+- It leaves repeated runs, probing over time, and other abuse controls to the deployment.
+- A real deployment still needs transport security, peer authentication, authorization, rate limits, and operational controls.
 
 Start with [START_HERE.md](START_HERE.md).
 
@@ -106,8 +106,7 @@ That demo starts two separate SecretFlow containers. Each container mounts only 
 
 ## Evidence
 
-The repository produces records you can review after a run. It does not produce a self-proving security guarantee.
-
+The repository produces records you can review after a run. Those records are useful for review, but they are not a self-proving security guarantee.
 Single-host standalone runs produce:
 
 - `output/audit.json`: input hashes, output hash, execution timing, SecretFlow version, and runner/validator hashes

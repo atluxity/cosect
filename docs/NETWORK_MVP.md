@@ -4,7 +4,7 @@
 
 The network shape is peer-to-peer PSI with optional metadata coordination.
 
-It is not a file-upload service.
+The network layer is there to coordinate the run, not to collect input files.
 
 If any shared service receives both plaintext CSVs, the trust boundary has already failed.
 
@@ -65,7 +65,7 @@ The plaintext CSV stays only on the host that owns it.
 
 ## Minimal Security Model
 
-For the first distributed networked version, assume:
+For the initial distributed version, assume:
 
 - fixed peer identities
 - TLS between peers

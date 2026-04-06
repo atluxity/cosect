@@ -2,9 +2,9 @@
 
 ## BLUF
 
-If you care about the actual trust boundary, use the distributed remote path, not the standalone path.
+If the trust boundary matters, use the distributed remote path.
 
-In the distributed path, Party A keeps its plaintext on Party A's host and Party B keeps its plaintext on Party B's host. The standalone path is only for quick local validation on one machine.
+In the distributed path, Party A keeps its plaintext on Party A's host and Party B keeps its plaintext on Party B's host. The standalone path is for quick local validation on one machine.
 
 This repository includes sample CSV fixtures in `data/` and deeper operational docs in `docs/`.
 
@@ -29,7 +29,7 @@ What it does:
 - prints the intersection summary and matching domains
 - writes `poc_output/audit.json` with input and output hashes plus execution metadata
 
-What it does not demonstrate:
+What it leaves out:
 
 - the remote trust boundary
 - party-local plaintext retention

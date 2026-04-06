@@ -2,7 +2,7 @@
 
 ## BLUF
 
-The acceptance target is not "PSI works in Docker." The acceptance target is:
+The acceptance target is:
 
 - exact intersection
 - mutual output
@@ -37,7 +37,7 @@ Each party receives a local CSV containing only the intersecting `domain` values
 - `broadcast_result=True`
 - default starting protocol: `KKRT_PSI_2PC`
 
-`KKRT_PSI_2PC` is the default starting point because the dataset sizes are modest and the goal is a practical MVP, not protocol experimentation.
+`KKRT_PSI_2PC` is the default starting point because the dataset sizes are modest and the goal is a practical MVP. Protocol experimentation is outside the scope of this repo.
 
 ## Acceptance Criteria
 
