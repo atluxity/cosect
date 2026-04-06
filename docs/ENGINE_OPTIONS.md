@@ -34,7 +34,7 @@ Why it stays in the repo for now:
 - it already works end to end
 - it matches the current trust boundary
 - it has open source code, public docs, and an active upstream
-- it gave us real distributed packet captures to inspect
+- it comes from a larger privacy-compute ecosystem led by Ant Group
 
 Why it is still uncomfortable:
 
@@ -53,6 +53,7 @@ Why it looks promising:
 - it is a narrower PSI library rather than a broad privacy-compute platform
 - the protocol story is easier to explain
 - the project is easier to describe to a skeptical reader than a larger SPU-based stack
+- it comes from the OpenMined open-source ecosystem rather than a larger vendor platform
 
 What changed in this repository to support it:
 
@@ -100,11 +101,11 @@ For this repository, the two engines are close in business outcome and different
 - OpenMined is asymmetric. In this repository, Party B learns the result first and then sends it back so both sides end with the same output file and receipt.
 - SecretFlow has the heavier runtime and dependency footprint.
 - OpenMined has the smaller and easier-to-explain code surface.
-- SecretFlow has been exercised more deeply in this repository over time.
-- OpenMined now has working standalone and distributed paths plus packet-capture and canary checks, but it still has less history here.
+- SecretFlow is associated with Ant Group and a broader industrial privacy-compute stack.
+- OpenMined PSI is associated with the OpenMined non-profit open-source ecosystem and a narrower PSI library surface.
 
 So the difference is not "one works and one does not." The real difference is:
 
 - symmetric engine flow versus asymmetric engine flow
 - heavier stack versus lighter library
-- different upstream trust choices
+- different upstream organizations and trust choices

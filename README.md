@@ -11,6 +11,11 @@ The repository currently supports two backends:
 - `secretflow`
 - `openmined`
 
+Those backends come from different upstreams:
+
+- `secretflow` is part of the Ant Group-led SecretFlow ecosystem
+- `openmined` is built on the OpenMined open-source PSI library
+
 Session files and run receipts carry an explicit `engine` field so the surrounding operator flow stays stable even when the PSI engine changes.
 
 In the remote setup, each side keeps its own CSV on its own machine. The two sides run the PSI process directly against each other. They do not send their full lists to a shared service, and no central system is allowed to hold both plaintext inputs.
