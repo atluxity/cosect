@@ -78,12 +78,18 @@ Why it is interesting:
 
 - it is a serious open-source PSI project
 - it is narrower in scope than SecretFlow
+- it comes from Microsoft, which some audiences may find easier to stand behind institutionally than either Ant Group or a smaller non-profit ecosystem
 
 Why it is a weaker fit for this repository:
 
 - APSI is asymmetric by design
 - that is less natural for the current "both sides end with the same intersection" story
+- it is more naturally a C++ library and CLI integration project than a lightweight Python adapter
 - integrating it would likely change the operator story more than OpenMined PSI would
+
+Feasibility note:
+
+- [APSI_FEASIBILITY.md](APSI_FEASIBILITY.md)
 
 ## Practical Recommendation
 
